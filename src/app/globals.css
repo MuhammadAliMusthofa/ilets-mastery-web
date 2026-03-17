@@ -8,6 +8,8 @@
 
 @import "shadcn/tailwind.css";
 
+@source "../features";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -15,7 +17,8 @@
   --color-mon-green: #295e4e;
   --color-mon-light: #f5f6f8;
   --color-mon-blue: #92bfee;
-
+  --color-brand-cyan: #00e5ff;   /* Biru terang sebelah kiri */
+  --color-brand-purple: #8a2be2; /* Ungu sebelah kanan */
   /* Warna Tombol & Teks */
   --color-mon-dark: #1f1f1f;
 }
