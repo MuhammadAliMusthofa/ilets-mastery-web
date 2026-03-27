@@ -1,10 +1,10 @@
 "use client";
 
-import React, { use } from "react";
-// 1. IMPORT KOMPONEN GLOBAL KITA
+import React from "react"; // Hapus 'use' dari import React karena tidak digunakan
+// 1. Pastikan path 'card' huruf kecil
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, PlayCircle, Lock, BookOpen, ChevronRight, ArrowLeft } from "lucide-react";
+import { CheckCircle2, Lock, BookOpen, ChevronRight, ArrowLeft } from "lucide-react"; // Hapus PlayCircle jika tidak digunakan
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -29,7 +29,6 @@ export default function SkillDetailContainer({ skill }: SkillDetailProps) {
   const unitsToShow = skill === "speaking" ? DUMMY_UNITS.slice(0, 4) : DUMMY_UNITS;
   const router = useRouter();
 
-  // Fungsi buat nentuin tema warna berdasarkan nama skill (biar nyambung sama halaman depan)
   const getHeaderTheme = () => {
     switch (skill.toLowerCase()) {
       case "listening": return "from-blue-500 to-blue-400";
@@ -46,12 +45,11 @@ export default function SkillDetailContainer({ skill }: SkillDetailProps) {
       {/* --- TOMBOL KEMBALI --- */}
       <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-brand-purple mb-8 transition-colors">
         <ArrowLeft size={16} />
-        Back to Dashboard
+        {"Back to Dashboard"}
       </Link>
 
       {/* --- HEADER BANNER --- */}
       <div className={`mb-10 p-8 rounded-[32px] text-white shadow-xl bg-gradient-to-tr ${getHeaderTheme()} relative overflow-hidden`}>
-        {/* Dekorasi Bulatan Transparan */}
         <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-white/10 rounded-full blur-2xl"></div>
         <div className="absolute bottom-[-50%] left-[-10%] w-[200px] h-[200px] bg-black/10 rounded-full blur-2xl"></div>
         
@@ -61,13 +59,13 @@ export default function SkillDetailContainer({ skill }: SkillDetailProps) {
               <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
                 <BookOpen size={24} className="text-white" />
               </div>
-              <span className="text-white/80 font-bold uppercase tracking-widest text-xs">Materi Ujian</span>
+              <span className="text-white/80 font-bold uppercase tracking-widest text-xs">{"Materi Ujian"}</span>
             </div>
             <h1 className="text-4xl font-black mb-3">
-              {formattedSkillTitle} Mastery
+              {formattedSkillTitle} {" Mastery"}
             </h1>
             <p className="text-white/90 text-sm md:text-base max-w-lg">
-              Selesaikan unit pembelajaran di bawah ini secara berurutan untuk memaksimalkan skor {formattedSkillTitle} kamu.
+              {"Selesaikan unit pembelajaran di bawah ini secara berurutan untuk memaksimalkan skor "} {formattedSkillTitle} {" kamu."}
             </p>
           </div>
         </div>
@@ -76,7 +74,6 @@ export default function SkillDetailContainer({ skill }: SkillDetailProps) {
       {/* --- LIST UNIT MATERI --- */}
       <div className="space-y-4">
         {unitsToShow.map((unit, index) => {
-          
           const isCompleted = unit.status === "completed";
           const isOngoing = unit.status === "ongoing";
           const isLocked = unit.status === "locked";
@@ -84,7 +81,7 @@ export default function SkillDetailContainer({ skill }: SkillDetailProps) {
           return (
             <Card 
               key={unit.id}
-              variant="default" // Pake varian default dari Card global kita
+              variant="default"
               className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 transition-all duration-300 ${
                 isCompleted ? "bg-white border-green-100 hover:border-green-300" :
                 isOngoing ? "bg-white border-brand-cyan/40 shadow-md ring-4 ring-brand-cyan/10" :
@@ -92,16 +89,12 @@ export default function SkillDetailContainer({ skill }: SkillDetailProps) {
               }`}
             >
               <div className="flex items-start sm:items-center gap-5 w-full">
-                
-                {/* Ikon Status & Nomor */}
                 <div className={`relative flex shrink-0 h-14 w-14 items-center justify-center rounded-2xl font-black text-xl shadow-sm ${
                   isCompleted ? "bg-green-100 text-green-600" :
                   isOngoing ? "bg-gradient-to-tr from-brand-cyan to-brand-purple text-white shadow-brand-purple/20" :
                   "bg-slate-200 text-slate-400"
                 }`}>
                   {isLocked ? <Lock size={20} /> : index + 1}
-                  
-                  {/* Badge Centang kecil di pojok ikon kalau udah selesai */}
                   {isCompleted && (
                     <div className="absolute -bottom-1 -right-1 bg-white rounded-full">
                       <CheckCircle2 size={18} className="text-green-500" fill="white" />
@@ -109,10 +102,9 @@ export default function SkillDetailContainer({ skill }: SkillDetailProps) {
                   )}
                 </div>
                 
-                {/* Judul Unit */}
                 <div className="flex-1 pr-4">
                   <p className="text-xs font-bold uppercase tracking-wider mb-1 text-slate-400">
-                    Unit {unit.id}
+                    {"Unit "} {unit.id}
                   </p>
                   <h3 className={`text-base sm:text-lg font-bold leading-tight mb-1 ${
                     isLocked ? "text-slate-500" : "text-slate-800"
@@ -129,22 +121,21 @@ export default function SkillDetailContainer({ skill }: SkillDetailProps) {
                 </div>
               </div>
 
-              {/* Action Button */}
               <div className="mt-4 sm:mt-0 w-full sm:w-auto flex justify-end">
                 {isCompleted && (
                   <Button variant="outline" className="w-full sm:w-auto rounded-xl border-slate-200 text-slate-600 hover:text-green-600 hover:bg-green-50 font-bold bg-white">
-                    Review
+                    {"Review"}
                   </Button>
                 )}
                 {isOngoing && (
                   <Button variant="default" className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-brand-cyan to-brand-purple text-white hover:opacity-90 shadow-md font-bold group" onClick={() => router.push(`/student/materials/${skill}/${unit.id}`)}>
-                    Lanjutkan
+                    {"Lanjutkan"}
                     <ChevronRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 )}
                 {isLocked && (
                   <Button variant="ghost" disabled className="w-full sm:w-auto rounded-xl text-slate-400 bg-slate-100 font-bold">
-                    Terkunci
+                    {"Terkunci"}
                   </Button>
                 )}
               </div>
@@ -152,7 +143,6 @@ export default function SkillDetailContainer({ skill }: SkillDetailProps) {
           );
         })}
       </div>
-
     </div>
   );
 }

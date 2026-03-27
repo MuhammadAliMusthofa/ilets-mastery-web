@@ -1,23 +1,27 @@
 "use client";
 
-// Pastikan import path ini huruf kecil di ujungnya 'card' ya bang biar aman
+import React from "react";
+// 1. Pastikan path 'card' huruf kecil jika file aslinya kecil
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Button } from "@/components/ui/button";
 import { BookOpen, Headphones, PenTool, Mic2, Star, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function StudentContainer() {
-
-        const router = useRouter();
+    const router = useRouter();
     
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* WELCOME SECTION */}
             <div className="flex flex-col gap-1">
                 <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                    Welcome back, <span className="bg-gradient-to-r from-brand-cyan to-brand-purple bg-clip-text text-transparent">Warrior!</span> 🚀
+                    {"Welcome back, "}
+                    <span className="bg-gradient-to-r from-brand-cyan to-brand-purple bg-clip-text text-transparent">
+                        {"Warrior!"}
+                    </span> 
+                    {" 🚀"}
                 </h1>
-                <p className="text-slate-500">Don't stop until you reach your target band score.</p>
+                {/* 2. Memperbaiki tanda kutip pada kata "Don't" */}
+                <p className="text-slate-500">{"Don't stop until you reach your target band score."}</p>
             </div>
 
             {/* QUICK STATS */}
@@ -28,8 +32,8 @@ export default function StudentContainer() {
                             <Star size={24} />
                         </div>
                         <div>
-                            <p className="text-sm text-slate-500 font-medium">Target Band</p>
-                        <h3 className="text-2xl font-bold text-slate-800">8.0</h3>
+                            <p className="text-sm text-slate-500 font-medium">{"Target Band"}</p>
+                            <h3 className="text-2xl font-bold text-slate-800">{"8.0"}</h3>
                         </div>
                     </CardContent>
                 </Card>
@@ -40,8 +44,8 @@ export default function StudentContainer() {
                             <Clock size={24} />
                         </div>
                         <div>
-                            <p className="text-sm text-slate-500 font-medium">Practice Time</p>
-                            <h3 className="text-2xl font-bold text-slate-800">12h 45m</h3>
+                            <p className="text-sm text-slate-500 font-medium">{"Practice Time"}</p>
+                            <h3 className="text-2xl font-bold text-slate-800">{"12h 45m"}</h3>
                         </div>
                     </CardContent>
                 </Card>
@@ -50,10 +54,9 @@ export default function StudentContainer() {
             {/* MAIN SKILLS GRID */}
             <div>
                 <h2 className="text-xl font-bold text-slate-800 mb-6">
-                    Focus Your Training
+                    {"Focus Your Training"}
                 </h2>
                 
-                {/* 🔥 PERBAIKAN DI SINI: grid-cols-1 untuk HP, md:grid-cols-2 untuk Laptop/Tablet */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
                     {/* LISTENING CARD */}
@@ -64,9 +67,8 @@ export default function StudentContainer() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <CardTitle className="mb-2 text-xl">Listening</CardTitle>
-                            <p className="text-xs text-slate-500 mb-4">Master all 4 sections & various accents.</p>
-                            {/* <Button size="sm" variant="gradientOutline" className="w-full rounded-xl">Practice Now</Button> */}
+                            <CardTitle className="mb-2 text-xl">{"Listening"}</CardTitle>
+                            <p className="text-xs text-slate-500 mb-4">{"Master all 4 sections & various accents."}</p>
                         </CardContent>
                     </Card>
 
@@ -78,9 +80,8 @@ export default function StudentContainer() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <CardTitle className="mb-2 text-xl text-brand-purple">Reading</CardTitle>
-                            <p className="text-xs text-slate-500 mb-4">Improve skimming and scanning skills.</p>
-                            {/* <Button size="sm" variant="gradientOutline" className="w-full rounded-xl">Practice Now</Button> */}
+                            <CardTitle className="mb-2 text-xl text-brand-purple">{"Reading"}</CardTitle>
+                            <p className="text-xs text-slate-500 mb-4">{"Improve skimming and scanning skills."}</p>
                         </CardContent>
                     </Card>
 
@@ -92,9 +93,8 @@ export default function StudentContainer() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <CardTitle className="mb-2 text-xl text-orange-600">Writing</CardTitle>
-                            <p className="text-xs text-slate-500 mb-4">Task 1 & 2 essay structured practice.</p>
-                            {/* <Button size="sm" variant="gradientOutline" className="w-full rounded-xl">Submit Essay</Button> */}
+                            <CardTitle className="mb-2 text-xl text-orange-600">{"Writing"}</CardTitle>
+                            <p className="text-xs text-slate-500 mb-4">{"Task 1 & 2 essay structured practice."}</p>
                         </CardContent>
                     </Card>
 
@@ -106,9 +106,8 @@ export default function StudentContainer() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <CardTitle className="mb-2 text-xl text-emerald-600">Speaking</CardTitle>
-                            <p className="text-xs text-slate-500 mb-4">Mock test with AI analysis feedback.</p>
-                            {/* <Button size="sm" variant="gradientOutline" className="w-full rounded-xl">Record Session</Button> */}
+                            <CardTitle className="mb-2 text-xl text-emerald-600">{"Speaking"}</CardTitle>
+                            <p className="text-xs text-slate-500 mb-4">{"Mock test with AI analysis feedback."}</p>
                         </CardContent>
                     </Card>
 

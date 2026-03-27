@@ -116,7 +116,7 @@ export default function LoginContainer() {
                     </Form>
 
                     <p className="text-center text-sm text-slate-500">
-                        Don't have an account? <a href="#" className="text-brand-purple font-medium hover:text-brand-cyan transition-colors">Register here</a>
+                        {"Don't have an account? "}<a href="#" className="text-brand-purple font-medium hover:text-brand-cyan transition-colors">Register here</a>
                     </p>
                 </CardContent>
             </Card>
