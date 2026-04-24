@@ -24,7 +24,7 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: #F9F9F9;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -143,5 +143,19 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Tambahkan di baris paling bawah globals.css lu */
+/* Tambahkan di baris paling bawah globals.css lu */
+@layer utilities {
+  .bg-grid {
+    background-image: 
+      linear-gradient(to right, #e2e8f0 1.5px, transparent 1.5px),
+      linear-gradient(to bottom, #e2e8f0 1.5px, transparent 1.5px);
+  }
+
+  .bg-dot {
+    background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
   }
 }
