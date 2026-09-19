@@ -12,9 +12,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 // Import skema validasi dari folder validator lu
 import { loginSchema } from "../validator/validation";
+import { useState } from "react";
+import { authService } from "../services/auth.service";
+import { useAuthStore } from "@/src/store/authStore";
+import { isAdminRole, type AuthUser } from "@/src/models/auth";
+import Link from "next/link";
 
 export default function LoginContainer() {
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState("");
+    const setAuth = useAuthStore((state) => state.setAuth);
 
     // Inisialisasi form pakai skema Zod yang udah di-import
     const form = useForm<z.infer<typeof loginSchema>>({
@@ -26,13 +34,24 @@ export default function LoginContainer() {
     });
 
     // Fungsi saat tombol submit diklik
-    function onSubmit(values: z.infer<typeof loginSchema>) {
-        console.log("Data user:", values);
+    async function onSubmit(values: z.infer<typeof loginSchema>) {
+        try {
+            setIsLoading(true);
+            setErrorMsg("");
+            const res = await authService.login(values);
+            
+            // Backend sudah mengirim role dan memasang cookie accessToken & role sendiri,
+            // jadi tidak ada pemetaan maupun penulisan cookie di sisi klien.
+            const user: AuthUser = res.data.user;
+            setAuth(user, res.data.token);
 
-        // Loading simulasi 1 detik
-        setTimeout(() => {
-            router.push("/dashboard");
-        }, 1000);
+            router.push(isAdminRole(user.role) ? "/admin" : "/dashboard");
+        } catch (error: any) {
+            console.error("Login Error:", error);
+            setErrorMsg(error.response?.data?.message || "Gagal login, periksa kembali email & password Anda.");
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -58,6 +77,12 @@ export default function LoginContainer() {
 
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+                            {errorMsg && (
+                                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
+                                    {errorMsg}
+                                </div>
+                            )}
 
                             <div className="space-y-4">
                                 {/* FIELD EMAIL */}
@@ -108,15 +133,16 @@ export default function LoginContainer() {
                                 type="submit"
                                 variant="gradientOutline"
                                 className="w-full h-12 text-base rounded-xl font-bold tracking-wide"
+                                disabled={isLoading}
                             >
-                                Sign In
+                                {isLoading ? "Signing in..." : "Sign In"}
                             </Button>
 
                         </form>
                     </Form>
 
                     <p className="text-center text-sm text-slate-500">
-                        {"Don't have an account? "}<a href="#" className="text-brand-purple font-medium hover:text-brand-cyan transition-colors">Register here</a>
+                        {"Don't have an account? "}<Link href="/register" className="text-brand-purple font-medium hover:text-brand-cyan transition-colors">Register here</Link>
                     </p>
                 </CardContent>
             </Card>

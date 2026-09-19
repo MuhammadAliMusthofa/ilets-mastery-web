@@ -136,18 +136,18 @@ export default function Navbar() {
                   {user?.avatar ? (
                     <Image
                       src={user.avatar}
-                      alt={`${user.name}'s avatar`}
+                      alt={`${user.full_name}'s avatar`}
                       fill
                       className="object-cover"
                     />
                   ) : (
-                    user?.name?.charAt(0).toUpperCase() || "G"
+                    user?.full_name?.charAt(0).toUpperCase() || "G"
                   )}
                 </div>
 
                 <div className="hidden text-left sm:block">
                   <p className="text-[11px] font-bold text-slate-800 leading-tight">
-                    {user?.name || "Guest User"}
+                    {user?.full_name || "Guest User"}
                   </p>
                   <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest">
                     {user?.role || "Visitor"}
@@ -158,7 +158,7 @@ export default function Navbar() {
 
             <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-2xl border-slate-100 mt-2">
               <div className="px-3 py-2 sm:hidden mb-1 bg-slate-50 rounded-xl">
-                <p className="text-sm font-bold text-slate-800">{user?.name || "Guest User"}</p>
+                <p className="text-sm font-bold text-slate-800">{user?.full_name || "Guest User"}</p>
                 <p className="text-xs text-slate-500">{user?.email || "Belum login"}</p>
               </div>
 
