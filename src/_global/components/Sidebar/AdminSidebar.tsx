@@ -11,6 +11,7 @@ import {
   LogOut,
   BookOpen,
   FolderArchive,
+  FileText,
   ShieldCheck
 } from "lucide-react";
 import { cn } from "@/src/libs/utils";
@@ -18,6 +19,7 @@ import { cn } from "@/src/libs/utils";
 // --- MENU KHUSUS ADMIN CMS ---
 const SIDEBAR_MENUS = [
   { id: "overview", label: "System Overview", icon: LayoutDashboard, href: "/admin" },
+  { id: "passages", label: "Passage", icon: FileText, href: "/admin/passages" },
   { id: "questions", label: "Question Bank", icon: Database, href: "/admin/questions" },
   { id: "materials", label: "Study Materials", icon: BookOpen, href: "/admin/materials" }, // Buat ngatur Idioms, Vocab, Tenses
   { id: "packages", label: "Exam Packages", icon: FolderArchive, href: "/admin/packages" }, // Buat ngerakit Tryout
