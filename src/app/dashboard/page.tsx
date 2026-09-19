@@ -1,15 +1,16 @@
-"use function";
-import { WrapperGridBackground } from "@/src/_global/components/Background/WrapperGridBackground";
-import StudentContainer from "@/src/features/student-dashboard/containers/StudentContainer";
-
- // pakai "use client" ya kalau di file lu pakai ini
-
+import { ModuleHubContainer } from "@/src/features/shared/containers/ModuleHubContainer";
 
 export default function DashboardPage() {
   return (
-   <WrapperGridBackground>
-        <StudentContainer />
-    </WrapperGridBackground>
-  
+    <section>
+      <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
+      <p className="mt-2 text-slate-500">
+        Pilih module yang mau kamu kerjakan hari ini.
+      </p>
+
+      <div className="mt-6">
+        <ModuleHubContainer />
+      </div>
+    </section>
   );
 }
