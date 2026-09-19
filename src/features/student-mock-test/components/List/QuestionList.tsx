@@ -17,16 +17,19 @@ export function ExamQuestionList({ answers, onOptionSelect }: ExamQuestionListPr
         </p>
         
         <div className="space-y-10">
-          {MOCK_QUESTIONS.map((q) => (
+          {MOCK_QUESTIONS.map((q) => {
+            const questionId = Number(q.id);
+
+            return (
             <div key={q.id} className="space-y-4">
               <p className="font-semibold text-slate-800 text-base leading-relaxed flex gap-2">
-                <span className="font-black text-brand-purple shrink-0">{q.id}.</span> 
-                {q.question}
+                <span className="font-black text-brand-purple shrink-0">{q.id}.</span>
+                {q.question_text}
               </p>
-              
+
               <div className="space-y-2 pl-2 sm:pl-6">
-                {q.options.map((opt) => {
-                  const isSelected = answers[q.id] === opt.id;
+                {q.Options.map((opt) => {
+                  const isSelected = answers[questionId] === opt.id;
                   return (
                     <label 
                       key={opt.id}
@@ -46,11 +49,11 @@ export function ExamQuestionList({ answers, onOptionSelect }: ExamQuestionListPr
                       
                       <input 
                         type="radio" 
-                        name={`question-${q.id}`} 
+                        name={`question-${q.id}`}
                         value={opt.id}
                         className="hidden"
                         checked={isSelected}
-                        onChange={() => onOptionSelect(q.id, opt.id)}
+                        onChange={() => onOptionSelect(questionId, opt.id)}
                       />
                       
                       <div className="flex gap-2 text-sm sm:text-base">
@@ -62,7 +65,8 @@ export function ExamQuestionList({ answers, onOptionSelect }: ExamQuestionListPr
                 })}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <div className="h-20 lg:h-10"></div>
