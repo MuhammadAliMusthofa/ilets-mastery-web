@@ -10,4 +10,14 @@ export const API_ENDPOINTS = {
     list: "/modules",
     enroll: (key: string) => `/modules/${key}/enroll`,
   },
+  admin: {
+    passages: "/admin/passages",
+    passage: (id: number) => `/admin/passages/${id}`,
+    questions: "/admin/questions",
+    question: (id: number) => `/admin/questions/${id}`,
+    packages: "/admin/packages",
+    package: (id: number) => `/admin/packages/${id}`,
+    packageSections: (id: number) => `/admin/packages/${id}/sections`,
+    packagePublish: (id: number) => `/admin/packages/${id}/publish`,
+  },
 } as const;
