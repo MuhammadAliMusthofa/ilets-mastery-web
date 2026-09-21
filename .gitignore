@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Audio Listening hasil TTS; buat ulang lewat ielts-be/scripts/generate-listening-audio.ps1
+/public/audio/seed/

@@ -107,6 +107,7 @@ export type AttemptStatus = "IN_PROGRESS" | "SUBMITTED";
 export interface StudentQuestion {
   id: number;
   number: number;
+  audio_url: string | null;
   type_question_id: string;
   question_type: QuestionType;
   skill: Skill;

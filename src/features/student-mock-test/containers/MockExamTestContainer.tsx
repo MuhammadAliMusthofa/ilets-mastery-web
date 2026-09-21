@@ -2,7 +2,16 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Maximize, Minimize, CheckCircle2, Flag, Loader2, CloudOff, Cloud } from "lucide-react";
+import {
+  Maximize,
+  Minimize,
+  CheckCircle2,
+  Flag,
+  Loader2,
+  CloudOff,
+  Cloud,
+  Headphones,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/src/libs/utils";
 import { RenderQuestions } from "./Render/RenderQuestions";
@@ -280,6 +289,24 @@ export default function MockExamTestContainer() {
           />
         </div>
       </div>
+
+      {/* Audio milik passage: key = URL, jadi pemutaran tidak berhenti saat
+          berpindah nomor di dalam passage yang sama. */}
+      {current?.audio_url && (
+        <div className="flex shrink-0 items-center gap-3 border-b border-slate-200 bg-slate-100 px-6 py-2">
+          <Headphones size={16} className="shrink-0 text-slate-500" />
+          <audio
+            key={current.audio_url}
+            src={current.audio_url}
+            controls
+            preload="auto"
+            controlsList="nodownload noplaybackrate"
+            className="h-9 w-full"
+          >
+            Browser ini tidak mendukung pemutar audio.
+          </audio>
+        </div>
+      )}
 
       <div className="flex-1 overflow-hidden relative">
         {current && (
