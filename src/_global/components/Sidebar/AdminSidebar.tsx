@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuthStore } from "@/src/store/authStore";
 import { 
   LayoutDashboard, 
   Database, 
@@ -28,6 +29,13 @@ const SIDEBAR_MENUS = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const logout = useAuthStore((state) => state.logout);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logout();
+  };
 
   return (
     <aside className="w-64 bg-white border-r border-slate-100 flex flex-col justify-between shadow-sm z-20 shrink-0">
@@ -81,9 +89,14 @@ export default function AdminSidebar() {
           <Settings size={20} className="text-slate-400" />
           <span>System Settings</span>
         </button>
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors font-medium mt-2 border border-transparent hover:border-rose-100">
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors font-medium mt-2 border border-transparent hover:border-rose-100 disabled:opacity-60 disabled:cursor-wait"
+        >
           <LogOut size={20} />
-          <span>Logout</span>
+          <span>{isLoggingOut ? "Keluar…" : "Logout"}</span>
         </button>
       </div>
     </aside>
