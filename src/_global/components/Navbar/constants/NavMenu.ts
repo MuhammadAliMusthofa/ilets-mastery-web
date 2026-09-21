@@ -8,7 +8,7 @@ export const MAIN_NAV_ITEMS = [
         name: "Test",
         icon: BookOpen,
         children: [
-            { name: "Mock Test", href: "/student/test/mock", icon: BookCheck },
+            { name: "Mock Test", href: "/ielts/mock", icon: BookCheck },
             { name: "English Level", href: "/student/test/english-level", icon: StarsIcon },
         ]
     },

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useExamStore } from "@/src/store/examStore";
 import { cn } from "@/src/libs/utils";
 import { LongEssay } from "../../components/TypeQuestions/LongEssay";
 
@@ -19,17 +20,14 @@ interface LongEssayContainerProps {
 
 export function LongEssayContainer({ data, questionNumber }: LongEssayContainerProps) {
   // TODO: Nanti ganti pakai Zustand store
-  const [currentAnswer, setCurrentAnswer] = useState<string>("");
-
-  useEffect(() => {
-    setCurrentAnswer(""); // Nanti ambil dari state Zustand
-  }, [data?.id]);
+  // Store hanya me-render ulang komponen yang berlangganan soal ini, dan
+  // pengiriman ke server sudah di-debounce oleh autosave di container ujian.
+  const storedAnswer = useExamStore((state) => state.answers[Number(data?.id)]);
+  const setStoreAnswer = useExamStore((state) => state.setAnswer);
+  const currentAnswer = storedAnswer?.[0] ?? "";
 
   const handleAnswerSubmission = (value: string) => {
-    setCurrentAnswer(value);
-    // TODO: Karena ini ngetik essay panjang, lebih baik pakai debounce sebelum di-save ke Zustand
-    // biar gak berat nge-render state global tiap ngetik 1 huruf.
-    console.log(`Update Essay ID ${data.id}: ${value.length} characters`);
+    setStoreAnswer(Number(data.id), [value]);
   };
 
   const hasStimulus = !!(data?.text || data?.text_image);

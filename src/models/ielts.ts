@@ -96,3 +96,104 @@ export interface ExamPackage {
 export type PassageInput = Omit<Passage, "id" | "createdAt" | "updatedAt">;
 export type QuestionInput = Omit<Question, "id" | "createdAt" | "updatedAt">;
 export type SectionInput = { skill: Skill; duration_minutes?: number; question_ids: number[] };
+
+// ---------------------------------------------------------------------------
+// Sisi siswa: ujian
+// ---------------------------------------------------------------------------
+
+export type AttemptStatus = "IN_PROGRESS" | "SUBMITTED";
+
+/** Soal untuk siswa. Tidak pernah membawa kunci jawaban sebelum dikumpulkan. */
+export interface StudentQuestion {
+  id: number;
+  number: number;
+  type_question_id: string;
+  question_type: QuestionType;
+  skill: Skill;
+  marks: number;
+  text: string;
+  text_image?: string;
+  question_text: string;
+  column_answer?: number;
+  Options: QuestionOption[];
+  AttachmentQuestion: QuestionAttachment[];
+}
+
+export interface StudentSection {
+  skill: Skill;
+  duration_minutes: number;
+  total_marks: number;
+  question_ids: number[];
+}
+
+export interface StudentPackageSummary {
+  id: number;
+  title: string;
+  description: string | null;
+  package_type: "FULL" | "SECTION";
+  skills: Skill[];
+  total_marks: number;
+  duration_minutes: number;
+  last_attempt: {
+    id: number;
+    status: AttemptStatus;
+    band_scores: Partial<Record<Skill, number | null>> | null;
+    submitted_at: string | null;
+  } | null;
+}
+
+export interface StudentPackageDetail extends StudentPackageSummary {
+  sections: StudentSection[];
+}
+
+export interface AttemptSession {
+  attempt_id: number;
+  package: { id: number; title: string; package_type: "FULL" | "SECTION" };
+  status: AttemptStatus;
+  started_at: string;
+  expires_at: string;
+  server_time: string;
+  sections: StudentSection[];
+  questions: StudentQuestion[];
+  answers: Record<number, string[]>;
+}
+
+export interface SectionResult {
+  skill: Skill;
+  raw: number;
+  max: number;
+  scaled_raw: number | null;
+  band: number | null;
+  auto_scored: boolean;
+}
+
+export interface ReviewedQuestion {
+  id: number;
+  number: number;
+  skill: Skill;
+  question_type: QuestionType;
+  question_text: string;
+  options: QuestionOption[];
+  answer: string[];
+  accepted_answers: string[][];
+  is_correct: boolean | null;
+  awarded: number;
+  max_marks: number;
+  explanation: string | null;
+}
+
+export interface AttemptResult {
+  attempt_id: number;
+  package: { id: number; title: string; package_type: "FULL" | "SECTION" };
+  status: AttemptStatus;
+  started_at: string;
+  submitted_at: string | null;
+  sections: SectionResult[];
+  overall_band: number | null;
+  questions: ReviewedQuestion[];
+}
+
+export interface AnswerInput {
+  question_id: number;
+  answer: string[];
+}

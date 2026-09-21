@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PROTECTED_PREFIXES = ['/dashboard', '/basic', '/ielts', '/plan', '/admin'];
+const PROTECTED_PREFIXES = ['/dashboard', '/basic', '/ielts', '/plan', '/admin', '/student'];
 const AUTH_PAGES = ['/login', '/register'];
 const ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN'];
 

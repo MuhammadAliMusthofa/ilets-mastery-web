@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useExamStore } from "@/src/store/examStore";
 import { cn } from "@/src/libs/utils";
 import { MapLabeling } from "../../components/TypeQuestions/MapLabeling";
 
@@ -26,29 +27,20 @@ interface MapLabelingContainerProps {
 export function MapLabelingContainer({ data, questionNumber }: MapLabelingContainerProps) {
   const columnCount = data?.column_answer || 1;
   
-  // Buat array state awal: [{number: 11, value: ''}, {number: 12, value: ''}]
-  const [labels, setLabels] = useState(() => 
-    Array.from({ length: columnCount }).map((_, i) => ({
-      number: questionNumber + i,
-      value: "",
-    }))
-  );
+  const storedAnswer = useExamStore((state) => state.answers[Number(data?.id)]);
+  const setStoreAnswer = useExamStore((state) => state.setAnswer);
 
-  useEffect(() => {
-    // Reset kalau pindah grup soal
-    setLabels(Array.from({ length: columnCount }).map((_, i) => ({
-      number: questionNumber + i,
-      value: "",
-    })));
-  }, [data?.id, columnCount, questionNumber]);
+  // Diturunkan dari store: [{number: 11, value: ''}, {number: 12, value: ''}]
+  const labels = Array.from({ length: columnCount }).map((_, i) => ({
+    number: questionNumber + i,
+    value: storedAnswer?.[i] ?? "",
+  }));
 
   const handleLabelChange = (num: number, val: string) => {
-    const newLabels = labels.map(label => 
-      label.number === num ? { ...label, value: val } : label
+    setStoreAnswer(
+      Number(data.id),
+      labels.map((label) => (label.number === num ? val : label.value))
     );
-    setLabels(newLabels);
-    // TODO: Update Zustand store dengan newLabels
-    console.log(`Map Label Num ${num} updated:`, val);
   };
 
   // Cari gambar map-nya dari attachment

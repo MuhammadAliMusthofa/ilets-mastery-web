@@ -6,7 +6,12 @@ import { Send, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/src/libs/utils";
 
-export function SubmitTestDialog() {
+interface SubmitTestDialogProps {
+  /** Bila diisi, dipanggil alih-alih simulasi; navigasi diurus pemanggil. */
+  onSubmit?: () => Promise<void>;
+}
+
+export function SubmitTestDialog({ onSubmit }: SubmitTestDialogProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   
@@ -27,6 +32,16 @@ export function SubmitTestDialog() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
+    if (onSubmit) {
+      try {
+        await onSubmit();
+      } catch (error) {
+        console.error("Gagal melakukan submit:", error);
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     try {
       // 1. TODO: Panggil API Mutasi lu di sini (useSubmitLatihanSoal)
       // await submitLatihanSoal({ id, body: [...] })
@@ -36,7 +51,7 @@ export function SubmitTestDialog() {
 
       // 2. Lempar ke halaman Result/History sesuai tipe tes
       if (isMockTest) {
-        router.push("/student/test/mock/history"); // Ganti dengan rute result lu
+        router.push("/ielts/mock");
       } else if (isTryout) {
         router.push("/student/tryout/history");
       } else {

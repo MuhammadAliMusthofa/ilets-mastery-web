@@ -20,4 +20,14 @@ export const API_ENDPOINTS = {
     packageSections: (id: number) => `/admin/packages/${id}/sections`,
     packagePublish: (id: number) => `/admin/packages/${id}/publish`,
   },
+  exam: {
+    packages: "/ielts/packages",
+    package: (id: number) => `/ielts/packages/${id}`,
+    start: (packageId: number) => `/ielts/packages/${packageId}/attempts`,
+    attempts: "/ielts/attempts",
+    attempt: (id: number) => `/ielts/attempts/${id}`,
+    answers: (id: number) => `/ielts/attempts/${id}/answers`,
+    submit: (id: number) => `/ielts/attempts/${id}/submit`,
+    result: (id: number) => `/ielts/attempts/${id}/result`,
+  },
 } as const;
