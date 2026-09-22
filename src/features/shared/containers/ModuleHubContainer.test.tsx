@@ -48,7 +48,7 @@ describe('ModuleHubContainer', () => {
   it('membedakan module yang sudah diikuti dari yang belum', async () => {
     renderWithQuery(<ModuleHubContainer />);
 
-    expect(await screen.findByRole('link', { name: /Lanjut belajar/i })).toBeInTheDocument();
-    expect(await screen.findByRole('button', { name: /Mulai module ini/i })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /Continue learning/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /Start this module/i })).toBeInTheDocument();
   });
 });

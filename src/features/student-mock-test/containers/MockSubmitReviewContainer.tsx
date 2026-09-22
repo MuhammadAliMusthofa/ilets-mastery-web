@@ -2,19 +2,21 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Clock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { cn } from "@/src/libs/utils";
+import { PageBody, PageHeader } from "@/src/_global/components/Shell/AppShell";
+import { Battery } from "@/src/_global/components/Board/Board";
+import { Canvas, CharacterTile } from "@/src/_global/components/Showcase/Showcase";
+import { SKILL_TINT } from "@/src/_global/design/tokens";
 import { SubmitTestDialog } from "../components/Dialog/DialogSubmitTest";
-import { ReviewUserInfoCard } from "../components/Card/ReviewUserInfoCard";
-import { ReviewTimerBox } from "../components/Card/ReviewTimerBox";
-import { ReviewWarningBox } from "../components/Card/ReviewWarningBox";
-import { ReviewQuestionGrid } from "../components/Card/ReviewQuestionsGrid";
+import { ButtonNumber } from "../components/Button/ButtonNumber";
 import { useAttemptSession, useInvalidateExam } from "../hooks/useExam";
 import { examService } from "../services/exam.service";
 import { MOCK_ROUTES } from "../constants/routes";
 import { useExamStore, isAnswered } from "@/src/store/examStore";
 import { useAuthStore } from "@/src/store/authStore";
+import { SKILL_LABELS } from "@/src/models/ielts";
 
 const formatClock = (totalSeconds: number) => {
   const safe = Math.max(0, totalSeconds);
@@ -68,7 +70,7 @@ export default function MockSubmitReviewContainer() {
 
   const questions = useMemo(() => session?.questions ?? [], [session]);
 
-  const questionStatuses = useMemo(
+  const statuses = useMemo(
     () =>
       questions.map((question) => {
         if (flagged[question.id]) return "flagged" as const;
@@ -77,90 +79,130 @@ export default function MockSubmitReviewContainer() {
     [questions, answers, flagged]
   );
 
-  const stats = useMemo(
-    () => ({
-      answered: questionStatuses.filter((status) => status === "answered").length,
-      unanswered: questionStatuses.filter((status) => status === "unanswered").length,
-      flagged: questionStatuses.filter((status) => status === "flagged").length,
-    }),
-    [questionStatuses]
-  );
+  const stats = {
+    answered: statuses.filter((status) => status === "answered").length,
+    flagged: statuses.filter((status) => status === "flagged").length,
+    unanswered: statuses.filter((status) => status === "unanswered").length,
+  };
 
   const handleSubmit = async () => {
-    if (!session) {
-      return;
-    }
+    if (!session) return;
     await examService.submit(session.attempt_id, useExamStore.getState().allAnswers());
     useExamStore.getState().reset();
     invalidateExam();
     router.replace(MOCK_ROUTES.result(params.testId, session.attempt_id));
   };
 
-  // Grid memakai nomor urut tampilan (1..N), sama dengan indeks di halaman ujian.
-  const handleQuestionClick = (displayNumber: number) => {
+  // Nomor tampilan (1..N) sama dengan indeks di halaman ujian.
+  const jumpTo = (displayNumber: number) =>
     router.push(`${MOCK_ROUTES.exam(params.testId, attemptId)}&q=${displayNumber}`);
-  };
 
   if (isLoading || !session) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 text-slate-500">
-        <Loader2 className="mr-2 animate-spin" size={20} /> Memuat ringkasan jawaban…
-      </div>
+      <PageBody>
+        <p className="flex items-center gap-2 text-sm text-slate-500">
+          <Loader2 size={16} className="animate-spin" /> Loading your answer summary…
+        </p>
+      </PageBody>
     );
   }
 
+  const critical = secondsLeft <= 300;
+
+  // Kelompokkan nomor per skill agar full test tetap terbaca.
+  const groups = session.sections.map((section) => ({
+    skill: section.skill,
+    indexes: questions
+      .map((question, index) => ({ question, index }))
+      .filter(({ question }) => question.skill === section.skill),
+  }));
+
   return (
-    <div className="fixed inset-0 z-[100] h-screen w-full bg-[#f8fafc] overflow-y-auto py-12 px-4 sm:px-6 lg:px-8 font-sans [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-slate-200/50 to-transparent pointer-events-none" />
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-brand-cyan/10 blur-[100px] rounded-full pointer-events-none" />
+    <>
+      <PageHeader
+        title="Review before you submit"
+        description={session.package.title}
+        actions={
+          <>
+            <Button variant="outline" shape="pill" onClick={() => router.push(MOCK_ROUTES.exam(params.testId, attemptId))}>
+              <ArrowLeft size={16} /> Back to questions
+            </Button>
+            <SubmitTestDialog onSubmit={handleSubmit} unansweredCount={stats.unanswered} />
+          </>
+        }
+      />
 
-      <div className="max-w-6xl mx-auto relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
-            Siap untuk mengumpulkan?
-          </h1>
-          <p className="text-slate-500 text-lg font-medium">
-            Cek kembali jawabanmu sebelum waktu habis.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-4 space-y-6">
-            <ReviewUserInfoCard
-              user={{
-                name: user?.full_name ?? "Peserta",
-                email: user?.email ?? "",
-                testName: session.package.title,
-              }}
-            />
-
-            <ReviewTimerBox timeLeftStr={formatClock(secondsLeft)} />
-
-            <div className="space-y-3">
-              <SubmitTestDialog onSubmit={handleSubmit} />
-              <Button
-                variant="outline"
-                onClick={() => router.push(MOCK_ROUTES.exam(params.testId, attemptId))}
-                className="w-full h-14 rounded-xl font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
-              >
-                <ArrowLeft className="mr-2" size={18} />
-                Kembali ke Lembar Soal
-              </Button>
+      <PageBody>
+        <div className="grid gap-8 xl:grid-cols-[1fr_320px]">
+          <div className="space-y-5">
+            <div className="rounded-3xl border border-slate-200 p-6">
+              <Battery
+                label="Answer summary"
+                segments={[
+                  { tone: "done", value: stats.answered, label: "answered" },
+                  { tone: "working", value: stats.flagged, label: "flagged" },
+                  { tone: "empty", value: stats.unanswered, label: "blank" },
+                ]}
+              />
+              <p className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[14px] text-slate-700">
+                <span><span className="tabular font-semibold">{stats.answered}</span> answered</span>
+                <span><span className="tabular font-semibold">{stats.flagged}</span> flagged</span>
+                <span><span className="tabular font-semibold">{stats.unanswered}</span> blank</span>
+              </p>
             </div>
+
+            {groups.map((group) => (
+              <Canvas key={group.skill} tint={SKILL_TINT[group.skill]} className="p-3 sm:p-4">
+                <div className="flex items-center gap-3 px-2 pb-4 pt-1">
+                  <CharacterTile skill={group.skill} size={40} />
+                  <h2 className="font-display text-[20px] font-normal text-slate-900">{SKILL_LABELS[group.skill]}</h2>
+                  <span className="tabular ml-auto text-[14px] text-slate-600">{group.indexes.length} questions</span>
+                </div>
+                <div className="grid grid-cols-6 gap-2 rounded-3xl bg-white p-4 sm:grid-cols-10 lg:grid-cols-12">
+                  {group.indexes.map(({ index }) => (
+                    <ButtonNumber
+                      key={index}
+                      number={index + 1}
+                      status={statuses[index]}
+                      onClick={() => jumpTo(index + 1)}
+                    />
+                  ))}
+                </div>
+              </Canvas>
+            ))}
           </div>
 
-          <div className="lg:col-span-8 space-y-6">
-            <ReviewWarningBox unansweredCount={stats.unanswered} />
+          <aside className="self-start rounded-4xl bg-slate-950 p-6 text-white xl:sticky xl:top-24">
+            <p className="text-[13px] text-[#c3c6d4]">Time left</p>
+            <p
+              className={cn(
+                "tabular mt-2 flex items-center gap-2 font-display text-[40px] leading-none",
+                critical ? "text-[#ff8a9b]" : "text-white"
+              )}
+            >
+              <Clock size={24} className={critical ? "text-[#ff8a9b]" : "text-[#b9e3ff]"} />
+              {secondsLeft > 0 ? formatClock(secondsLeft) : "Time's up"}
+            </p>
 
-            <ReviewQuestionGrid
-              statuses={questionStatuses}
-              stats={stats}
-              totalQuestions={questions.length}
-              onQuestionClick={handleQuestionClick}
-            />
-          </div>
+            <dl className="mt-6 space-y-3 border-t border-white/15 pt-5 text-[14px]">
+              <div>
+                <dt className="text-[13px] text-[#c3c6d4]">Candidate</dt>
+                <dd className="text-white">{user?.full_name ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-[13px] text-[#c3c6d4]">Email</dt>
+                <dd className="truncate text-white">{user?.email ?? "—"}</dd>
+              </div>
+            </dl>
+
+            {stats.unanswered > 0 && (
+              <p className="mt-5 rounded-2xl bg-[#fff3e0] px-4 py-3 text-[13px] leading-relaxed text-slate-800">
+                Blank answers are marked wrong. Click a number to go back and fill it in.
+              </p>
+            )}
+          </aside>
         </div>
-      </div>
-    </div>
+      </PageBody>
+    </>
   );
 }

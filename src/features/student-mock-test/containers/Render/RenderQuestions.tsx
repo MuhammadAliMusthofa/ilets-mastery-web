@@ -6,6 +6,7 @@ import { ShortEssayContainer } from "../Questions/ShortEssayContainer";
 import { LongEssayContainer } from "../Questions/LongEssayContainer";
 import { MapLabelingContainer } from "../Questions/MapLabelingContainer";
 import { TrueFalseContainer } from "../Questions/TrueFalseNGContainer";
+import { MultipleChoiceComplexContainer } from "../Questions/MultipleChoiceComplexContainer";
 
 // --- DUMMY IMPORT UNTUK TIPE LAIN (Nanti lu tinggal uncomment kalau komponennya udah dibikin) ---
 // import { EssayContainer } from "../Questions/EssayContainer";
@@ -15,10 +16,12 @@ import { TrueFalseContainer } from "../Questions/TrueFalseNGContainer";
 // Sesuaikan dengan model IQuestionData yang kita bikin di MultipleChoiceContainer
 interface IQuestionData {
   id: string | number;
-  type_question_id: string; // atau number kalau di backend lu pakai ID angka
+  type_question_id: string | number; // atau number kalau di backend lu pakai ID angka
   text?: string;
   text_image?: string;
   question_text: string;
+  column_answer?: number;
+  marks?: number;
   Options: any[];
   AttachmentQuestion?: any[];
 }
@@ -34,8 +37,8 @@ export function RenderQuestions({ questionData, questionNumber }: RenderQuestion
   if (!questionData) {
     return (
       <div className="flex flex-col items-center justify-center p-10 bg-slate-50 border border-slate-200 rounded-2xl text-center">
-        <h3 className="text-lg font-bold text-slate-700 mb-2">Soal Tidak Ditemukan</h3>
-        <p className="text-sm text-slate-500">Data pertanyaan gagal dimuat atau belum tersedia.</p>
+        <h3 className="text-lg font-bold text-slate-700 mb-2">Question not found</h3>
+        <p className="text-sm text-slate-500">The question data couldn't be loaded or isn't available yet.</p>
       </div>
     );
   }
@@ -57,8 +60,9 @@ export function RenderQuestions({ questionData, questionNumber }: RenderQuestion
       );
 
     // TIPE 2: MULTIPLE CHOICE COMPLEX (Jawaban bisa lebih dari 1)
-    // case "2":
-    //   return <MultipleChoiceComplexContainer data={questionData} questionNumber={questionNumber} />;
+    case "2":
+    case "multiple_choice_complex":
+      return <MultipleChoiceComplexContainer data={questionData} questionNumber={questionNumber} />;
 
     // TIPE 3: TRUE OR FALSE
     case "3":
@@ -88,9 +92,9 @@ export function RenderQuestions({ questionData, questionNumber }: RenderQuestion
     default:
       return (
         <div className="flex flex-col items-center justify-center p-10 bg-orange-50 border border-orange-200 rounded-2xl text-center">
-          <h3 className="text-lg font-bold text-orange-800 mb-2">Tipe Soal Belum Didukung</h3>
+          <h3 className="text-lg font-bold text-orange-800 mb-2">Question type not supported yet</h3>
           <p className="text-sm text-orange-600">
-            Komponen untuk tipe soal (ID: {questionData.type_question_id}) belum tersedia.
+            There's no component for this question type (ID: {questionData.type_question_id}) yet.
           </p>
         </div>
       );

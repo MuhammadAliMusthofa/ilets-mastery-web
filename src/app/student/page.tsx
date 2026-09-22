@@ -1,9 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import StudentContainer from "@/src/features/student-dashboard/containers/StudentContainer";
-
-
+// Beranda siswa kini di /dashboard; rute lama diarahkan ke sana.
 export default function StudentPage() {
- 
-  return <StudentContainer />;
+  redirect("/dashboard");
 }

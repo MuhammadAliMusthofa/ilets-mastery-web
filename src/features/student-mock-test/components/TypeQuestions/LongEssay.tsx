@@ -2,63 +2,43 @@
 
 import React, { useMemo } from "react";
 import { cn } from "@/src/libs/utils";
+import { QuestionNumber, QuestionText } from "./QuestionNumber";
 
 interface ILongEssayProps {
   questionId: number;
   question: string;
   value: string;
   onChange: (value: string) => void;
-  minWords?: number; // Target minimal kata (contoh: 150 atau 250)
+  /** Target minimal kata (150 untuk Task 1, 250 untuk Task 2). */
+  minWords?: number;
 }
 
-export function LongEssay({
-  questionId,
-  question,
-  value,
-  onChange,
-  minWords = 250,
-}: ILongEssayProps) {
-  
-  // Fungsi penghitung kata yang akurat (mengabaikan spasi ganda)
-  const wordCount = useMemo(() => {
-    if (!value.trim()) return 0;
-    return value.trim().split(/\s+/).length;
-  }, [value]);
-
-  const isWordCountMet = wordCount >= minWords;
+export function LongEssay({ questionId, question, value, onChange, minWords = 250 }: ILongEssayProps) {
+  const wordCount = useMemo(() => (value.trim() ? value.trim().split(/\s+/).length : 0), [value]);
+  const met = wordCount >= minWords;
+  const inputId = `q-${questionId}-essay`;
 
   return (
     <div className="space-y-4">
-      {/* 1. PERTANYAAN / PROMPT WRITING */}
-      <div className="font-semibold text-slate-800 text-base leading-relaxed flex gap-3 mb-6 bg-slate-50 p-5 rounded-2xl border border-slate-100">
-        <span className="font-black text-brand-purple shrink-0">{questionId}.</span>
-        <div 
-          className="prose prose-slate max-w-none text-slate-700 w-full"
-          dangerouslySetInnerHTML={{ __html: question }} 
-        />
+      <div className="flex gap-3">
+        <QuestionNumber value={questionId} className="mt-0.5" />
+        <label htmlFor={inputId} className="block">
+          <QuestionText html={question} className="[&>p:first-child]:mt-0" />
+        </label>
       </div>
 
-      {/* 2. TEXTAREA WRITING */}
-      <div className="relative group">
+      <div className="overflow-hidden rounded-lg border border-slate-300 transition-colors duration-150 focus-within:border-primary-500 hover:border-slate-800 focus-within:hover:border-primary-500">
         <textarea
+          id={inputId}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Start writing your essay here..."
-          className={cn(
-            "w-full min-h-[400px] p-5 bg-white border-2 rounded-2xl outline-none transition-all text-slate-800 leading-relaxed resize-y custom-scrollbar",
-            value ? "border-brand-purple/30 bg-slate-50/50" : "border-slate-200 hover:border-slate-300",
-            "focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/10 focus:bg-white"
-          )}
+          onChange={(event) => onChange(event.target.value)}
+          spellCheck={false}
+          className="block min-h-[380px] w-full resize-y bg-white p-4 text-[16px] leading-relaxed text-slate-800 focus:outline-none"
         />
-        
-        {/* 3. WORD COUNTER INDICATOR */}
-        <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full border border-slate-200 shadow-sm">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Word Count:</span>
-          <span className={cn(
-            "text-sm font-black",
-            isWordCountMet ? "text-emerald-600" : "text-orange-500"
-          )}>
-            {wordCount} <span className="text-slate-400 font-medium">/ {minWords} min</span>
+        <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-4 py-2 text-[13px]">
+          <span className="text-slate-500">At least {minWords} words</span>
+          <span className={cn("tabular font-medium", met ? "text-[#007a47]" : "text-slate-800")} aria-live="polite">
+            {wordCount} words
           </span>
         </div>
       </div>

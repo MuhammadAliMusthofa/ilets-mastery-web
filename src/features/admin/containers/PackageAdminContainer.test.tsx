@@ -82,19 +82,19 @@ describe('PackageAdminContainer', () => {
     renderWithQuery(<PackageAdminContainer />);
     await screen.findByText('GT Tryout 1');
 
-    await userEvent.click(screen.getByRole('button', { name: /Susun isi GT Tryout 1/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Build GT Tryout 1/i }));
 
-    expect(await screen.findByText(/Soal tersedia/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Available questions/i)).toBeInTheDocument();
   });
 
   it('menambahkan soal dari bank ke section', async () => {
     renderWithQuery(<PackageAdminContainer />);
     await screen.findByText('GT Tryout 1');
-    await userEvent.click(screen.getByRole('button', { name: /Susun isi GT Tryout 1/i }));
-    await screen.findByText(/Soal tersedia/i);
+    await userEvent.click(screen.getByRole('button', { name: /Build GT Tryout 1/i }));
+    await screen.findByText(/Available questions/i);
 
-    await userEvent.click(await screen.findByRole('button', { name: /Tambahkan soal 11/i }));
-    await userEvent.click(screen.getByRole('button', { name: /Simpan susunan/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /Add question 11/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Save structure/i }));
 
     expect(ieltsAdminService.packages.setSections).toHaveBeenCalledWith(
       2,
@@ -109,10 +109,10 @@ describe('PackageAdminContainer', () => {
 
     renderWithQuery(<PackageAdminContainer />);
     await screen.findByText('GT Tryout 1');
-    await userEvent.click(screen.getByRole('button', { name: /Susun isi GT Tryout 1/i }));
-    await screen.findByText(/Soal tersedia/i);
+    await userEvent.click(screen.getByRole('button', { name: /Build GT Tryout 1/i }));
+    await screen.findByText(/Available questions/i);
 
-    await userEvent.click(screen.getByRole('button', { name: /Terbitkan/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Publish/i }));
 
     expect(
       await screen.findByText(/Section READING harus berisi 40 soal, saat ini 1/i)
@@ -123,9 +123,9 @@ describe('PackageAdminContainer', () => {
     renderWithQuery(<PackageAdminContainer />);
     await screen.findByText('GT Tryout 1');
 
-    await userEvent.click(screen.getByRole('button', { name: /Paket Baru/i }));
-    await userEvent.type(screen.getByLabelText(/^Judul paket/i), 'GT Tryout 2');
-    await userEvent.click(screen.getByRole('button', { name: /^Simpan$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /New package/i }));
+    await userEvent.type(screen.getByLabelText(/^Package title/i), 'GT Tryout 2');
+    await userEvent.click(screen.getByRole('button', { name: /^Save$/i }));
 
     expect(ieltsAdminService.packages.create).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'GT Tryout 2' })

@@ -1,21 +1,25 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle2, XCircle, MinusCircle, Loader2, RotateCcw, Info } from "lucide-react";
-import { Card } from "@/components/ui/Card";
+import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
+import { ArrowRight, Info, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/src/libs/utils";
+import { PageBody } from "@/src/_global/components/Shell/AppShell";
+import {
+  BandMeter,
+  Canvas,
+  CharacterFigure,
+  CharacterTile,
+  Chip,
+  PillTabs,
+  SectionTitle,
+} from "@/src/_global/components/Showcase/Showcase";
+import { SKILL_COLOR, SKILL_TINT, STATUS_COLOR, type LabelColor } from "@/src/_global/design/tokens";
 import { useAttemptResult } from "../hooks/useExam";
 import { MOCK_ROUTES } from "../constants/routes";
-import { SKILL_LABELS, type ReviewedQuestion, type Skill } from "@/src/models/ielts";
-
-const SKILL_ACCENT: Record<Skill, string> = {
-  LISTENING: "text-blue-600 bg-blue-50",
-  READING: "text-emerald-600 bg-emerald-50",
-  WRITING: "text-orange-600 bg-orange-50",
-  SPEAKING: "text-brand-purple bg-brand-purple/10",
-};
+import { SKILL_LABELS, type ReviewedQuestion } from "@/src/models/ielts";
 
 const formatBand = (band: number) => band.toFixed(1);
 
@@ -35,7 +39,7 @@ const describeAnswer = (question: ReviewedQuestion, values: string[]): string =>
   }
   if (question.question_type === "LONG_ESSAY") {
     const words = filled[0].trim().split(/\s+/).length;
-    return `${words} kata`;
+    return `${words} words`;
   }
   return filled.join(" · ");
 };
@@ -50,10 +54,16 @@ const describeKey = (question: ReviewedQuestion): string => {
   return question.accepted_answers.map((variants) => variants.join(" / ")).join(" · ");
 };
 
+const verdictOf = (question: ReviewedQuestion): { label: string; color: LabelColor } => {
+  if (question.is_correct === null) return { label: "Self-assessment", color: STATUS_COLOR.empty };
+  if (question.is_correct) return { label: "Correct", color: STATUS_COLOR.done };
+  if (question.awarded > 0) return { label: "Partial", color: STATUS_COLOR.partial };
+  return { label: "Wrong", color: STATUS_COLOR.stuck };
+};
+
 type Filter = "all" | "wrong";
 
 export default function MockResultContainer() {
-  const router = useRouter();
   const params = useParams<{ testId: string }>();
   const searchParams = useSearchParams();
   const attemptId = Number(searchParams.get("attempt"));
@@ -72,235 +82,227 @@ export default function MockResultContainer() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-slate-500">
-        <Loader2 className="mr-2 animate-spin" size={20} /> Menghitung nilai…
-      </div>
+      <PageBody>
+        <p className="flex items-center gap-2 text-[15px] text-slate-500">
+          <Loader2 size={16} className="animate-spin" /> Calculating your score…
+        </p>
+      </PageBody>
     );
   }
 
   if (isError || !result) {
     return (
-      <div className="p-8 text-center">
-        <p className="mb-4 font-medium text-slate-600">Hasil ujian tidak ditemukan.</p>
-        <Button variant="outline" onClick={() => router.push(MOCK_ROUTES.list)}>
-          Kembali ke daftar tes
-        </Button>
-      </div>
+      <PageBody>
+        <p className="mb-5 text-[16px] text-slate-700">We couldn't find this result.</p>
+        <Link href={MOCK_ROUTES.list} className="text-[15px] font-medium text-primary-500 hover:underline">
+          Back to all tests
+        </Link>
+      </PageBody>
     );
   }
 
   const scoredSections = result.sections.filter((section) => section.band !== null);
-  const headlineBand =
-    result.overall_band ?? (scoredSections.length === 1 ? scoredSections[0].band : null);
+  const headlineBand = result.overall_band ?? (scoredSections.length === 1 ? scoredSections[0].band : null);
   const hasPending = result.sections.some((section) => !section.auto_scored);
-  const hasScaled = result.sections.some(
-    (section) => section.auto_scored && section.max !== 40
-  );
+  const hasScaled = result.sections.some((section) => section.auto_scored && section.max !== 40);
   const wrongCount = autoQuestions.filter((question) => question.is_correct === false).length;
+  const correctCount = autoQuestions.filter((question) => question.is_correct === true).length;
+  const leadSkill = result.sections[0]?.skill ?? "READING";
 
   return (
-    <div className="p-4 sm:p-8 max-w-5xl mx-auto animate-in fade-in duration-500">
-      <button
-        type="button"
-        onClick={() => router.push(MOCK_ROUTES.list)}
-        className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-brand-purple transition-colors mb-8 bg-white/50 px-4 py-2 rounded-full w-fit backdrop-blur-sm"
-      >
-        <ArrowLeft size={16} /> Kembali ke Daftar Tes
-      </button>
-
-      {/* --- Ringkasan --- */}
-      <div className="relative mb-8 p-1 bg-gradient-to-r from-slate-800 to-slate-900 rounded-[32px] shadow-xl overflow-hidden">
-        <div className="absolute -top-10 right-0 w-72 h-72 bg-brand-cyan/20 rounded-full blur-3xl mix-blend-screen" />
-        <div className="relative flex flex-col gap-8 rounded-[31px] border border-white/10 bg-slate-900/50 p-8 text-white backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:p-12">
-          <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-cyan">Hasil Ujian</p>
-            <h1 className="mb-3 text-3xl font-black tracking-tight sm:text-4xl">{result.package.title}</h1>
-            {result.submitted_at && (
-              <p className="text-sm text-slate-400">
-                Dikumpulkan{" "}
-                {new Date(result.submitted_at).toLocaleString("id-ID", {
-                  dateStyle: "long",
-                  timeStyle: "short",
-                })}
+    <>
+      {/* Hero gelap: band sebagai angka terbesar di halaman. */}
+      <div className="mx-auto max-w-[1320px] px-3 pt-3 sm:px-5 lg:px-8 lg:pt-6">
+        <section className="relative overflow-hidden rounded-4xl bg-slate-950 text-white">
+          <div className="grid lg:grid-cols-[1.2fr_1fr]">
+            <div className="relative z-10 px-7 py-12 sm:px-12 lg:py-16 lg:pl-14">
+              <p className="text-[15px] text-[#c3c6d4]">
+                Test result
+                {result.submitted_at &&
+                  ` · ${new Date(result.submitted_at).toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" })}`}
               </p>
-            )}
-          </div>
+              <h1 className="mt-3 max-w-[20ch] font-display text-[34px] font-normal leading-[1.1] tracking-[-0.02em] sm:text-[46px]">
+                {result.package.title}
+              </h1>
 
-          <div className="shrink-0 text-center sm:text-right">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-              {result.overall_band !== null ? "Overall band" : "Estimasi band"}
-            </p>
-            <p className="text-7xl font-black tabular-nums leading-none tracking-tight">
-              {headlineBand !== null ? formatBand(headlineBand) : "—"}
-            </p>
-            {result.overall_band === null && hasPending && (
-              <p className="mt-2 max-w-[16rem] text-xs text-slate-400">
-                Overall band muncul setelah Writing & Speaking dinilai lewat self-assessment.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* --- Per skill --- */}
-      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {result.sections.map((section) => (
-          <Card
-            key={section.skill}
-            className="rounded-[24px] border-slate-100 bg-white/80 p-5 shadow-sm backdrop-blur-sm"
-          >
-            <span
-              className={cn(
-                "mb-4 inline-block rounded-md px-2.5 py-1 text-[11px] font-black uppercase tracking-wider",
-                SKILL_ACCENT[section.skill]
-              )}
-            >
-              {SKILL_LABELS[section.skill]}
-            </span>
-
-            {section.auto_scored ? (
-              <>
-                <p className="text-4xl font-black tabular-nums text-slate-900">
-                  {section.band !== null ? formatBand(section.band) : "—"}
-                </p>
-                <p className="mt-1 text-sm font-medium text-slate-500">
-                  {section.raw} / {section.max} benar
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-4xl font-black text-slate-300">—</p>
-                <p className="mt-1 text-sm font-medium text-slate-500">Menunggu self-assessment</p>
-              </>
-            )}
-          </Card>
-        ))}
-      </div>
-
-      {(hasScaled || scoredSections.length > 0) && (
-        <p className="mb-10 flex items-start gap-2 text-xs text-slate-500">
-          <Info size={14} className="mt-0.5 shrink-0" />
-          <span>
-            Band adalah estimasi dari tabel konversi General Training, bukan nilai resmi.
-            {hasScaled &&
-              " Paket ini lebih pendek dari 40 soal, jadi skornya diskalakan ke 40 sebelum dikonversi."}
-          </span>
-        </p>
-      )}
-
-      {/* --- Pembahasan --- */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-black text-slate-800">Pembahasan</h2>
-        <div className="flex rounded-xl border border-slate-100 bg-white p-1 shadow-sm">
-          {(
-            [
-              ["all", `Semua (${result.questions.length})`],
-              ["wrong", `Salah (${wrongCount})`],
-            ] as const
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setFilter(key)}
-              aria-pressed={filter === key}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-sm font-bold transition-colors",
-                filter === key ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-800"
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        {visibleQuestions.map((question) => {
-          const status = question.is_correct;
-          const partial = status === false && question.awarded > 0;
-
-          return (
-            <Card
-              key={question.id}
-              className="rounded-2xl border-slate-100 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-start gap-4">
-                <div className="mt-0.5 shrink-0">
-                  {status === true && <CheckCircle2 className="text-emerald-500" size={22} />}
-                  {status === false && !partial && <XCircle className="text-red-500" size={22} />}
-                  {partial && <MinusCircle className="text-amber-500" size={22} />}
-                  {status === null && <MinusCircle className="text-slate-300" size={22} />}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
-                    <span>
-                      {SKILL_LABELS[question.skill]} · Soal {question.number}
-                      {question.max_marks > 1 ? `–${question.number + question.max_marks - 1}` : ""}
-                    </span>
-                    {status !== null && (
-                      <span className="tabular-nums">
-                        {question.awarded}/{question.max_marks}
-                      </span>
-                    )}
-                  </div>
-
-                  <p
-                    className="mb-3 font-semibold text-slate-800"
-                    dangerouslySetInnerHTML={{ __html: question.question_text }}
-                  />
-
-                  <dl className="grid gap-2 text-sm sm:grid-cols-2">
-                    <div>
-                      <dt className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Jawabanmu
-                      </dt>
-                      <dd className={cn("font-medium", status === false ? "text-red-600" : "text-slate-700")}>
-                        {describeAnswer(question, question.answer)}
-                      </dd>
-                    </div>
-                    {status !== null && (
-                      <div>
-                        <dt className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                          Jawaban benar
-                        </dt>
-                        <dd className="font-medium text-emerald-700">{describeKey(question)}</dd>
-                      </div>
-                    )}
-                  </dl>
-
-                  {status === null && (
-                    <p className="mt-2 text-sm text-slate-500">
-                      Dinilai lewat self-assessment dengan rubrik band descriptor.
-                    </p>
-                  )}
-
-                  {question.explanation && (
-                    <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm leading-relaxed text-slate-600">
-                      {question.explanation}
+              <div className="mt-8 flex items-end gap-5">
+                {headlineBand !== null ? (
+                  <p className="tabular font-display text-[96px] leading-[0.85] tracking-[-0.03em] sm:text-[120px]">
+                    {formatBand(headlineBand)}
+                  </p>
+                ) : (
+                  <p className="font-display text-[40px] leading-none text-[#c3c6d4] sm:text-[52px]">Pending</p>
+                )}
+                <div className="pb-2">
+                  <p className="text-[15px] text-white">{result.overall_band !== null ? "Overall band" : "Estimated band"}</p>
+                  {autoQuestions.length > 0 && (
+                    <p className="tabular text-[14px] text-[#c3c6d4]">
+                      {correctCount} of {autoQuestions.length} auto-marked questions correct
                     </p>
                   )}
                 </div>
               </div>
-            </Card>
-          );
-        })}
+              {result.overall_band === null && hasPending && (
+                <p className="mt-4 max-w-[44ch] text-[14px] text-[#c3c6d4]">
+                  Your overall band appears once Writing & Speaking are scored through self-assessment.
+                </p>
+              )}
 
-        {visibleQuestions.length === 0 && (
-          <p className="py-10 text-center font-medium text-slate-400">
-            Tidak ada jawaban yang salah. Mantap.
-          </p>
-        )}
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link
+                  href={MOCK_ROUTES.detail(params.testId)}
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-[#b9e3ff] px-7 text-[15px] font-medium text-slate-900 transition-colors hover:bg-white"
+                >
+                  <RotateCcw size={16} /> Retake this test
+                </Link>
+                <Link
+                  href={MOCK_ROUTES.list}
+                  className="inline-flex h-12 items-center gap-2 rounded-full border border-white/40 px-7 text-[15px] font-medium text-white transition-colors hover:border-white hover:bg-white/10"
+                >
+                  All mock tests <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative hidden min-h-[360px] lg:block">
+              <CharacterFigure
+                skill={leadSkill}
+                priority
+                sizes="420px"
+                className="absolute bottom-0 left-1/2 h-[90%] w-[80%] -translate-x-1/2"
+              />
+            </div>
+          </div>
+        </section>
       </div>
 
-      <div className="mt-10 flex justify-center">
-        <Button
-          onClick={() => router.push(MOCK_ROUTES.detail(params.testId))}
-          className="h-12 rounded-xl bg-slate-900 px-6 font-bold text-white hover:bg-brand-purple"
-        >
-          Ulangi tes ini <RotateCcw size={16} className="ml-2" />
-        </Button>
-      </div>
-    </div>
+      <PageBody className="space-y-20 pt-12">
+        {/* Band per skill */}
+        <section aria-label="Band by skill">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {result.sections.map((section) => (
+              <Canvas key={section.skill} as="article" tint={SKILL_TINT[section.skill]} className="p-6">
+                <div className="flex items-center gap-3">
+                  <CharacterTile skill={section.skill} size={44} />
+                  <h2 className="font-display text-[20px] font-normal text-slate-900">{SKILL_LABELS[section.skill]}</h2>
+                </div>
+                {section.auto_scored ? (
+                  <>
+                    <p className="tabular mt-6 font-display text-[48px] leading-none text-slate-900">
+                      {section.band !== null ? formatBand(section.band) : "—"}
+                    </p>
+                    <p className="tabular mt-2 text-[14px] text-slate-700">
+                      {section.raw} / {section.max} correct
+                    </p>
+                    <div className="mt-4">
+                      <BandMeter band={section.band} color={SKILL_COLOR[section.skill].bg} />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="mt-6 font-display text-[28px] leading-none text-slate-500">Not scored yet</p>
+                    <p className="mt-2 text-[14px] text-slate-700">Awaiting self-assessment</p>
+                  </>
+                )}
+              </Canvas>
+            ))}
+          </div>
+
+          {(hasScaled || scoredSections.length > 0) && (
+            <p className="mt-5 flex items-start gap-2 text-[14px] text-slate-600">
+              <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <span>
+                Bands are estimates from the General Training conversion table, not official scores.
+                {hasScaled && " This package has fewer than 40 questions, so the score is scaled to 40 before conversion."}
+              </span>
+            </p>
+          )}
+        </section>
+
+        {/* Pembahasan */}
+        <section aria-labelledby="pembahasan">
+          <SectionTitle
+            id="pembahasan"
+            title="Answer review"
+            description="Compare your answers with the key, then read the explanation."
+            action={
+              <PillTabs<Filter>
+                label="Filter review"
+                value={filter}
+                onChange={setFilter}
+                tabs={[
+                  { id: "all", label: "All", count: result.questions.length },
+                  { id: "wrong", label: "Wrong", count: wrongCount, dot: STATUS_COLOR.stuck.bg },
+                ]}
+              />
+            }
+          />
+
+          <ol className="space-y-4">
+            {visibleQuestions.map((question) => {
+              const verdict = verdictOf(question);
+              const wrong = question.is_correct === false;
+
+              return (
+                <li key={question.id} className="rounded-3xl border border-slate-200 p-5 sm:p-6">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="tabular inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-slate-950 px-2.5 text-[13px] font-medium text-white">
+                      {question.number}
+                      {question.max_marks > 1 ? `–${question.number + question.max_marks - 1}` : ""}
+                    </span>
+                    <Chip color={SKILL_COLOR[question.skill]}>{SKILL_LABELS[question.skill]}</Chip>
+                    <Chip color={verdict.color}>{verdict.label}</Chip>
+                    {question.is_correct !== null && (
+                      <span className="tabular ml-auto text-[13px] text-slate-600">
+                        {question.awarded}/{question.max_marks} points
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    className="mt-4 text-[16px] leading-relaxed text-slate-900 [&_p]:my-1"
+                    dangerouslySetInnerHTML={{ __html: question.question_text }}
+                  />
+
+                  <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className={cn("rounded-2xl px-4 py-3", wrong ? "bg-[#fdeef1]" : "bg-slate-50")}>
+                      <dt className="text-[13px] text-slate-600">Your answer</dt>
+                      <dd className="mt-0.5 text-[15px] font-medium text-slate-900">{describeAnswer(question, question.answer)}</dd>
+                    </div>
+                    {question.is_correct !== null ? (
+                      <div className="rounded-2xl bg-[#dcf7ea] px-4 py-3">
+                        <dt className="text-[13px] text-slate-600">Correct answer</dt>
+                        <dd className="mt-0.5 text-[15px] font-medium text-slate-900">{describeKey(question)}</dd>
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                        <dt className="text-[13px] text-slate-600">Scoring</dt>
+                        <dd className="mt-0.5 text-[15px] text-slate-800">Self-assessment with the band descriptor rubric</dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  {question.explanation && (
+                    <p className="mt-4 border-l-2 border-slate-300 pl-4 text-[15px] leading-relaxed text-slate-700">
+                      {question.explanation}
+                    </p>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+
+          {visibleQuestions.length === 0 && (
+            <div className="rounded-3xl border border-dashed border-slate-300 px-6 py-12 text-center">
+              <p className="font-display text-[22px] text-slate-900">No wrong answers.</p>
+              <p className="mt-1 text-[15px] text-slate-600">You got every auto-marked question right.</p>
+              <Button variant="outline" shape="pill" className="mt-5" onClick={() => setFilter("all")}>
+                Show all
+              </Button>
+            </div>
+          )}
+        </section>
+      </PageBody>
+    </>
   );
 }

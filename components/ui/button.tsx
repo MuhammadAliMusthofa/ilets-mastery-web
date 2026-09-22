@@ -2,36 +2,48 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "@radix-ui/react-slot"
 
-import { cn } from "@/lib/utils" // Pastikan path ini sesuai dengan project lu
+import { cn } from "@/lib/utils"
 
+/**
+ * Tombol mengikuti Vibe (monday.com): sudut 4px, tinggi 32/40/48px,
+ * satu biru untuk aksi utama. Nama varian lama dipertahankan agar halaman
+ * yang memakainya tidak rusak; varian gradasi kini jatuh ke gaya outline.
+ */
 const buttonVariants = cva(
-  // Base classes (Semua tombol otomatis jadi rounded-full dan punya animasi membal)
-  "group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all duration-200 active:scale-95 outline-none select-none focus-visible:ring-3 focus-visible:ring-brand-purple/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-[4px] border border-transparent text-sm font-medium whitespace-nowrap transition-colors duration-150 ease-out select-none outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:pointer-events-none disabled:bg-slate-100 disabled:text-slate-400 disabled:border-transparent [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-r from-brand-cyan to-brand-purple text-white shadow-sm hover:opacity-90 hover:shadow-md",
-        outline: "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
-        secondary: "bg-slate-100 text-slate-800 hover:bg-slate-200",
-        ghost: "hover:bg-slate-100 text-slate-700",
-        destructive: "bg-red-500 text-white hover:bg-red-600",
-        link: "text-brand-purple underline-offset-4 hover:underline",
-
-        // 🔥 INI DIA VARIAN BARU KITA: GRADIENT OUTLINE
-        // Triknya: Tombolnya punya background putih, tapi kita taruh elemen gaib (::before) di belakangnya dengan ukuran sedikit lebih besar (inset -2px) dan kasih background gradasi!
-        // Di dalam variant: { ... }
-      gradientOutline: "relative bg-white text-slate-800 border-2 border-transparent bg-clip-padding before:absolute before:inset-0 before:-z-10 before:-m-[2px] before:rounded-[inherit] before:bg-gradient-to-r before:from-brand-cyan before:to-brand-purple hover:bg-transparent hover:text-white transition-all duration-300 shadow-sm hover:shadow-brand-purple/30",
+        default: "bg-primary-500 text-white hover:bg-primary-600",
+        outline: "border-slate-300 bg-white text-slate-800 hover:bg-slate-100",
+        secondary: "bg-slate-100 text-slate-800 hover:bg-[#dcdfec]",
+        ghost: "text-slate-800 hover:bg-[#dcdfec]",
+        destructive: "bg-[#d83a52] text-white hover:bg-[#b63546]",
+        link: "h-auto px-0 text-primary-500 hover:underline",
+        gradientOutline: "border-slate-300 bg-white text-slate-800 hover:bg-slate-100",
+        // Sisi siswa: tombol hitam ala halaman marketing monday.
+        dark: "bg-slate-950 text-white hover:bg-slate-800",
+      },
+      shape: {
+        square: "",
+        pill: "rounded-full",
       },
       size: {
-        default: "h-11 gap-2 px-6",
-        sm: "h-9 gap-1.5 px-4 text-xs",
-        lg: "h-14 gap-3 px-8 text-base",
-        icon: "size-11 rounded-full",
+        default: "h-10 px-4",
+        sm: "h-8 px-3 text-[13px]",
+        lg: "h-12 px-6 text-base",
+        icon: "size-10",
       },
     },
+    compoundVariants: [
+      { shape: "pill", size: "default", className: "px-5" },
+      { shape: "pill", size: "sm", className: "px-4" },
+      { shape: "pill", size: "lg", className: "px-7 text-[15px]" },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",
+      shape: "square",
     },
   }
 )
@@ -40,6 +52,7 @@ function Button({
   className,
   variant,
   size,
+  shape,
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
@@ -51,7 +64,7 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, shape, className }))}
       {...props}
     />
   )

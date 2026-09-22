@@ -6,6 +6,8 @@ import {
   Maximize,
   Minimize,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Flag,
   Loader2,
   CloudOff,
@@ -22,6 +24,8 @@ import { examService } from "../services/exam.service";
 import { MOCK_ROUTES } from "../constants/routes";
 import { useExamStore, isAnswered } from "@/src/store/examStore";
 import { SKILL_LABELS } from "@/src/models/ielts";
+import { SkillTag } from "@/src/_global/components/Board/Board";
+import { VibeMark } from "@/src/_global/components/Shell/Wordmark";
 
 const AUTOSAVE_INTERVAL_MS = 5000;
 
@@ -183,7 +187,7 @@ export default function MockExamTestContainer() {
   if (!Number.isFinite(attemptId)) {
     return (
       <div className="flex h-screen items-center justify-center p-8 text-center text-slate-600">
-        Sesi ujian tidak valid. Mulai ujian dari halaman detail tes.
+        Invalid test session. Start the test from its detail page.
       </div>
     );
   }
@@ -191,9 +195,9 @@ export default function MockExamTestContainer() {
   if (isError) {
     return (
       <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-slate-50 p-8 text-center">
-        <p className="font-medium text-slate-600">Sesi ujian tidak ditemukan.</p>
+        <p className="font-medium text-slate-600">Test session not found.</p>
         <Button variant="outline" onClick={() => router.push(MOCK_ROUTES.list)}>
-          Kembali ke daftar tes
+          Back to all tests
         </Button>
       </div>
     );
@@ -202,84 +206,77 @@ export default function MockExamTestContainer() {
   if (isLoading || !session || session.status === "SUBMITTED") {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 text-slate-500">
-        <Loader2 className="mr-2 animate-spin" size={20} /> Menyiapkan lembar soal…
+        <Loader2 className="mr-2 animate-spin" size={20} /> Preparing your question paper…
       </div>
     );
   }
 
+  const answeredCount = questions.filter((question) => isAnswered(answers[question.id])).length;
+  const numberRange = current
+    ? current.marks > 1
+      ? `${current.number}–${current.number + current.marks - 1}`
+      : `${current.number}`
+    : "-";
+
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col h-screen w-full bg-slate-50 overflow-hidden font-sans">
-      <header className="h-16 bg-slate-900 flex items-center justify-between gap-4 px-6 shrink-0 shadow-md">
-        <h1 className="truncate font-bold text-slate-200">{session.package.title}</h1>
+    <div className="fixed inset-0 z-[100] flex h-screen w-full flex-col overflow-hidden bg-white">
+      <header className="flex h-14 shrink-0 items-center gap-4 border-b border-slate-200 bg-white px-4 lg:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+          <VibeMark size={20} />
+          <h1 className="truncate text-[15px] font-medium text-slate-800">{session.package.title}</h1>
+        </div>
 
         <ExamTimer initialSeconds={initialSeconds} onTimeUp={submit} />
 
-        <div className="flex items-center gap-3">
-          <span
-            className="hidden items-center gap-1.5 text-xs font-medium text-slate-400 sm:flex"
-            aria-live="polite"
-          >
+        <div className="flex flex-1 items-center justify-end gap-2">
+          <span className="hidden items-center gap-1.5 text-[13px] text-slate-500 md:flex" aria-live="polite">
             {saveState === "saving" && (
               <>
-                <Loader2 size={14} className="animate-spin" /> Menyimpan…
+                <Loader2 size={14} className="animate-spin" /> Saving…
               </>
             )}
             {saveState === "saved" && (
               <>
-                <Cloud size={14} /> Tersimpan
+                <Cloud size={14} /> Saved
               </>
             )}
             {saveState === "error" && (
-              <span className="flex items-center gap-1.5 text-amber-400">
-                <CloudOff size={14} /> Belum tersimpan, mencoba lagi
+              <span className="flex items-center gap-1.5 text-[#b12a41]">
+                <CloudOff size={14} /> Not saved, retrying
               </span>
             )}
           </span>
-          <Button
-            onClick={toggleFullscreen}
-            variant="outline"
-            size="sm"
-            className="bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700"
-          >
-            {isFullscreen ? <Minimize size={16} className="mr-2" /> : <Maximize size={16} className="mr-2" />}
-            {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+          <Button variant="ghost" size="sm" onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit full screen" : "Full screen"}>
+            {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+            <span className="hidden lg:inline">{isFullscreen ? "Exit full screen" : "Full screen"}</span>
           </Button>
-          <Button onClick={goToReview} variant="destructive" size="sm">
-            Akhiri Tes
+          <Button variant="outline" size="sm" onClick={goToReview}>
+            Finish test
           </Button>
         </div>
       </header>
 
-      <div className="h-12 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
-        <div className="flex items-center gap-3 font-bold text-slate-600">
-          {current && (
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-black uppercase tracking-wider text-slate-500">
-              {SKILL_LABELS[current.skill]}
-            </span>
-          )}
-          <span>
-            Soal {current?.number ?? "-"}
-            <span className="ml-2 font-medium text-slate-400">
-              ({activeIndex + 1} dari {questions.length})
-            </span>
+      <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 lg:px-6">
+        <div className="flex min-w-0 items-center gap-3 text-[14px]">
+          {current && <SkillTag skill={current.skill}>{SKILL_LABELS[current.skill]}</SkillTag>}
+          <span className="tabular font-medium text-slate-800">Question {numberRange}</span>
+          <span className="tabular hidden text-slate-500 sm:inline">
+            {activeIndex + 1} of {questions.length}
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {current && (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => toggleFlag(current.id)}
               aria-pressed={!!flagged[current.id]}
-              className={cn(
-                "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-colors",
-                flagged[current.id]
-                  ? "bg-amber-100 text-amber-700"
-                  : "text-slate-500 hover:bg-slate-100"
-              )}
+              className={cn(flagged[current.id] && "bg-[#fff3e0] text-[#8a5200] hover:bg-[#ffe8c7]")}
             >
-              <Flag size={14} /> {flagged[current.id] ? "Ditandai" : "Tandai"}
-            </button>
+              <Flag size={14} className={cn(flagged[current.id] && "fill-current")} />
+              {flagged[current.id] ? "Flagged" : "Flag"}
+            </Button>
           )}
           <DialogShowAllNumber
             totalQuestions={questions.length}
@@ -293,7 +290,7 @@ export default function MockExamTestContainer() {
       {/* Audio milik passage: key = URL, jadi pemutaran tidak berhenti saat
           berpindah nomor di dalam passage yang sama. */}
       {current?.audio_url && (
-        <div className="flex shrink-0 items-center gap-3 border-b border-slate-200 bg-slate-100 px-6 py-2">
+        <div className="flex shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 py-2 lg:px-6">
           <Headphones size={16} className="shrink-0 text-slate-500" />
           <audio
             key={current.audio_url}
@@ -303,45 +300,39 @@ export default function MockExamTestContainer() {
             controlsList="nodownload noplaybackrate"
             className="h-9 w-full"
           >
-            Browser ini tidak mendukung pemutar audio.
+            Your browser doesn't support the audio player.
           </audio>
         </div>
       )}
 
-      <div className="flex-1 overflow-hidden relative">
+      <div className="relative flex-1 overflow-hidden">
         {current && (
-          <RenderQuestions
-            key={current.id}
-            questionData={current}
-            questionNumber={current.number}
-          />
+          <RenderQuestions key={current.id} questionData={current} questionNumber={current.number} />
         )}
       </div>
 
-      <footer className="h-16 bg-white border-t border-slate-200 flex items-center justify-between px-6 shrink-0">
-        <Button
-          variant="outline"
-          disabled={activeIndex === 0}
-          onClick={() => setActiveIndex((prev) => prev - 1)}
-        >
-          Soal Sebelumnya
+      <footer className="flex h-16 shrink-0 items-center justify-between gap-4 border-t border-slate-200 bg-white px-4 lg:px-6">
+        <Button variant="outline" disabled={activeIndex === 0} onClick={() => setActiveIndex((prev) => prev - 1)}>
+          <ChevronLeft size={16} /> Previous
         </Button>
+
+        <span className="hidden text-[13px] text-slate-500 sm:inline">
+          <span className="tabular font-medium text-slate-800">{answeredCount}</span> of{" "}
+          <span className="tabular">{questions.length}</span> answered
+        </span>
 
         <Button
           disabled={isSubmitting}
-          className={
-            isLastQuestion
-              ? "bg-gradient-to-r from-brand-cyan to-brand-purple text-white shadow-md hover:scale-[1.02] transition-all font-bold"
-              : "bg-slate-900 text-white hover:bg-brand-purple font-bold"
-          }
           onClick={isLastQuestion ? goToReview : () => setActiveIndex((prev) => prev + 1)}
         >
           {isLastQuestion ? (
             <>
-              Selesai & Review <CheckCircle2 className="ml-2" size={18} />
+              Finish &amp; review <CheckCircle2 size={16} />
             </>
           ) : (
-            "Soal Selanjutnya"
+            <>
+              Next <ChevronRight size={16} />
+            </>
           )}
         </Button>
       </footer>

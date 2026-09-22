@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react"; // Hapus 'use' dari import React karena tidak digunakan
-// 1. Pastikan path 'card' huruf kecil
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/button";
-import { CheckCircle2, Lock, BookOpen, ChevronRight, ArrowLeft } from "lucide-react"; // Hapus PlayCircle jika tidak digunakan
+import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { ArrowRight, Check, Lock } from "lucide-react";
+import { cn } from "@/src/libs/utils";
+import { Chip, SectionTitle } from "@/src/_global/components/Showcase/Showcase";
+import { SKILL_COLOR, STATUS_COLOR } from "@/src/_global/design/tokens";
 
 // --- DUMMY DATA ---
 const DUMMY_UNITS = [
@@ -24,138 +23,92 @@ interface SkillDetailProps {
   skill: string;
 }
 
+/** Daftar unit sebagai jalur: selesai, sedang dipelajari (disorot gelap), lalu terkunci. */
 export default function CoreSkillSyllabusContainer({ skill }: SkillDetailProps) {
-  const formattedSkillTitle = skill.charAt(0).toUpperCase() + skill.slice(1);
-  const unitsToShow = skill === "speaking" ? DUMMY_UNITS.slice(0, 4) : DUMMY_UNITS;
-  const router = useRouter();
-
-  const getHeaderTheme = () => {
-    switch (skill.toLowerCase()) {
-      case "listening": return "from-blue-500 to-blue-400";
-      case "reading": return "from-emerald-500 to-emerald-400";
-      case "writing": return "from-brand-cyan to-brand-purple";
-      case "speaking": return "from-orange-500 to-orange-400";
-      default: return "from-slate-600 to-slate-500";
-    }
-  };
-
-    const getHeaderDesc = () => {
-    if (["listening", "reading", "writing", "speaking"].includes(skill)) {
-      return `Selesaikan unit pembelajaran di bawah ini secara berurutan untuk memaksimalkan skor ${formattedSkillTitle} kamu.`;
-    }
-    if (skill === "teleprompter") {
-      return "Latih kelancaran berbicara kamu dengan teks berjalan layaknya news anchor profesional.";
-    }
-    return `Eksplorasi berbagai koleksi ${formattedSkillTitle} untuk memperkaya tata bahasa dan kosakata kamu.`;
-  };
-
-  
+  const units = skill === "speaking" ? DUMMY_UNITS.slice(0, 4) : DUMMY_UNITS;
+  const done = units.filter((unit) => unit.status === "completed").length;
+  const accent = SKILL_COLOR[skill.toUpperCase() as keyof typeof SKILL_COLOR]?.bg ?? "#0073ea";
 
   return (
-    <div className="p-4 sm:p-8 max-w-4xl mx-auto animate-in fade-in duration-500">
-         {/* --- TOMBOL KEMBALI --- */}
-            <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-brand-purple mb-8 transition-colors">
-              <ArrowLeft size={16} />
-              Back to Dashboard
-            </Link>
-      
-            {/* --- HEADER BANNER --- */}
-            <div className={`mb-10 p-8 rounded-[32px] text-white shadow-xl bg-gradient-to-tr ${getHeaderTheme()} relative overflow-hidden`}>
-              <div className="absolute top-[-50%] right-[-10%] w-[300px] h-[300px] bg-white/10 rounded-full blur-2xl"></div>
-              <div className="absolute bottom-[-50%] left-[-10%] w-[200px] h-[200px] bg-black/10 rounded-full blur-2xl"></div>
-              
-              <div className="relative z-10 flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                      <BookOpen size={24} className="text-white" />
-                    </div>
-                    <span className="text-white/80 font-bold uppercase tracking-widest text-xs">
-                      {skill === "teleprompter" ? "Practice Tool" : "Materi Ujian"}
-                    </span>
-                  </div>
-                  <h1 className="text-4xl font-black mb-3">
-                    {formattedSkillTitle} {["idioms", "vocab", "tenses"].includes(skill) ? "Collection" : "Mastery"}
-                  </h1>
-                  <p className="text-white/90 text-sm md:text-base max-w-lg">
-                    {getHeaderDesc()}
-                  </p>
-                </div>
-              </div>
+    <section aria-labelledby="units">
+      <SectionTitle
+        id="units"
+        title="Unit path"
+        description="Complete the units in order. Each one unlocks when you finish the one before."
+        action={
+          <div className="w-full max-w-[260px]">
+            <p className="tabular mb-2 text-[14px] text-slate-700">
+              {done} of {units.length} units complete
+            </p>
+            <div className="h-2 rounded-full bg-slate-100">
+              <div className="h-2 rounded-full" style={{ width: `${(done / units.length) * 100}%`, backgroundColor: accent }} />
             </div>
+          </div>
+        }
+      />
 
-      {/* --- LIST UNIT MATERI --- */}
-      <div className="space-y-4">
-        {unitsToShow.map((unit, index) => {
-          const isCompleted = unit.status === "completed";
-          const isOngoing = unit.status === "ongoing";
-          const isLocked = unit.status === "locked";
+      <ol className="space-y-3">
+        {units.map((unit) => {
+          const completed = unit.status === "completed";
+          const ongoing = unit.status === "ongoing";
+          const locked = unit.status === "locked";
+          const href = `/student/materials/${skill}/${unit.id}`;
 
           return (
-            <Card 
+            <li
               key={unit.id}
-              variant="default"
-              className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 transition-all duration-300 ${
-                isCompleted ? "bg-white border-green-100 hover:border-green-300" :
-                isOngoing ? "bg-white border-brand-cyan/40 shadow-md ring-4 ring-brand-cyan/10" :
-                "bg-slate-50/50 border-slate-100 opacity-70 grayscale-[20%]"
-              }`}
+              className={cn(
+                "flex flex-col gap-4 rounded-3xl p-5 sm:flex-row sm:items-center sm:gap-5 sm:p-6",
+                ongoing && "bg-slate-950 text-white",
+                completed && "border border-slate-200",
+                locked && "bg-slate-50"
+              )}
             >
-              <div className="flex items-start sm:items-center gap-5 w-full">
-                <div className={`relative flex shrink-0 h-14 w-14 items-center justify-center rounded-2xl font-black text-xl shadow-sm ${
-                  isCompleted ? "bg-green-100 text-green-600" :
-                  isOngoing ? "bg-gradient-to-tr from-brand-cyan to-brand-purple text-white shadow-brand-purple/20" :
-                  "bg-slate-200 text-slate-400"
-                }`}>
-                  {isLocked ? <Lock size={20} /> : index + 1}
-                  {isCompleted && (
-                    <div className="absolute -bottom-1 -right-1 bg-white rounded-full">
-                      <CheckCircle2 size={18} className="text-green-500" fill="white" />
-                    </div>
+              <span
+                className={cn(
+                  "tabular flex size-12 shrink-0 items-center justify-center rounded-2xl font-display text-[18px]",
+                  completed && "bg-[#00c875] text-slate-900",
+                  ongoing && "bg-[#b9e3ff] text-slate-900",
+                  locked && "bg-slate-200 text-slate-500"
+                )}
+                aria-hidden="true"
+              >
+                {completed ? <Check size={20} strokeWidth={2.5} /> : locked ? <Lock size={18} /> : unit.id}
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <p className={cn("text-[13px]", ongoing ? "text-[#c3c6d4]" : "text-slate-500")}>Unit {unit.id}</p>
+                <h3
+                  className={cn(
+                    "font-display text-[19px] font-normal leading-snug",
+                    locked ? "text-slate-500" : ongoing ? "text-white" : "text-slate-900"
                   )}
-                </div>
-                
-                <div className="flex-1 pr-4">
-                  <p className="text-xs font-bold uppercase tracking-wider mb-1 text-slate-400">
-                    {"Unit "} {unit.id}
-                  </p>
-                  <h3 className={`text-base sm:text-lg font-bold leading-tight mb-1 ${
-                    isLocked ? "text-slate-500" : "text-slate-800"
-                  }`}>
-                    {unit.title}
-                  </h3>
-                  <p className={`text-xs sm:text-sm font-medium ${
-                    isCompleted ? "text-green-600" : 
-                    isOngoing ? "text-brand-purple" : 
-                    "text-slate-400"
-                  }`}>
-                    {isCompleted ? "✓ Selesai dipelajari" : isOngoing ? "⏳ Sedang dipelajari" : "Terkunci"}
-                  </p>
-                </div>
+                >
+                  {unit.title}
+                </h3>
               </div>
 
-              <div className="mt-4 sm:mt-0 w-full sm:w-auto flex justify-end">
-                {isCompleted && (
-                  <Button variant="outline" className="w-full sm:w-auto rounded-xl border-slate-200 text-slate-600 hover:text-green-600 hover:bg-green-50 font-bold bg-white">
-                    {"Review"}
-                  </Button>
-                )}
-                {isOngoing && (
-                  <Button variant="default" className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-brand-cyan to-brand-purple text-white hover:opacity-90 shadow-md font-bold group" onClick={() => router.push(`/student/materials/${skill}/${unit.id}`)}>
-                    {"Lanjutkan"}
-                    <ChevronRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                )}
-                {isLocked && (
-                  <Button variant="ghost" disabled className="w-full sm:w-auto rounded-xl text-slate-400 bg-slate-100 font-bold">
-                    {"Terkunci"}
-                  </Button>
-                )}
-              </div>
-            </Card>
+              {completed && (
+                <div className="flex items-center gap-3">
+                  <Chip color={STATUS_COLOR.done}>Completed</Chip>
+                  <Link href={href} className="text-[14px] font-medium text-slate-800 hover:underline">
+                    Review
+                  </Link>
+                </div>
+              )}
+              {ongoing && (
+                <Link
+                  href={href}
+                  className="inline-flex h-11 items-center gap-2 self-start rounded-full bg-[#b9e3ff] px-6 text-[15px] font-medium text-slate-900 transition-colors hover:bg-white sm:self-auto"
+                >
+                  Continue <ArrowRight size={16} />
+                </Link>
+              )}
+              {locked && <span className="text-[14px] text-slate-500">Locked</span>}
+            </li>
           );
         })}
-      </div>
-    </div>
+      </ol>
+    </section>
   );
 }

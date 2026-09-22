@@ -1,10 +1,13 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/Card";
+import { ArrowLeft, Flag, Loader2, Play, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, Target, AlertTriangle, MonitorPlay, Loader2 } from "lucide-react";
+import { PageBody } from "@/src/_global/components/Shell/AppShell";
+import { Canvas, CharacterFigure, CharacterTile, Chip } from "@/src/_global/components/Showcase/Showcase";
+import { SKILL_COLOR, SKILL_TINT, STATUS_COLOR } from "@/src/_global/design/tokens";
 import { useExamPackage, useStartAttempt } from "../hooks/useExam";
 import { MOCK_ROUTES } from "../constants/routes";
 import { SKILL_LABELS } from "@/src/models/ielts";
@@ -15,8 +18,17 @@ interface MockTestDetailProps {
 
 const readErrorMessage = (error: unknown): string => {
   const response = (error as { response?: { data?: { message?: string } } })?.response;
-  return response?.data?.message ?? "Gagal memulai ujian. Coba lagi.";
+  return response?.data?.message ?? "Couldn't start the test. Check your connection and try again.";
 };
+
+function Stat({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div>
+      <dt className="text-[13px] text-slate-600">{label}</dt>
+      <dd className="tabular mt-0.5 font-display text-[26px] leading-none text-slate-900">{value}</dd>
+    </div>
+  );
+}
 
 export default function MockTestDetailContainer({ testId }: MockTestDetailProps) {
   const router = useRouter();
@@ -25,6 +37,7 @@ export default function MockTestDetailContainer({ testId }: MockTestDetailProps)
   const startAttempt = useStartAttempt();
 
   const inProgress = pkg?.last_attempt?.status === "IN_PROGRESS";
+  const done = pkg?.last_attempt?.status === "SUBMITTED";
 
   const handleStart = async () => {
     try {
@@ -40,114 +53,173 @@ export default function MockTestDetailContainer({ testId }: MockTestDetailProps)
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-slate-500">
-        <Loader2 className="mr-2 animate-spin" size={20} /> Memuat tes…
-      </div>
+      <PageBody>
+        <p className="flex items-center gap-2 text-[15px] text-slate-500">
+          <Loader2 size={16} className="animate-spin" /> Loading test…
+        </p>
+      </PageBody>
     );
   }
 
   if (isError || !pkg) {
     return (
-      <div className="p-8 text-center">
-        <p className="mb-4 font-medium text-slate-600">Tes tidak ditemukan atau belum diterbitkan.</p>
-        <Button variant="outline" onClick={() => router.push(MOCK_ROUTES.list)}>
-          Kembali ke daftar tes
+      <PageBody>
+        <p className="mb-5 text-[16px] text-slate-700">This test doesn't exist or hasn't been published yet.</p>
+        <Button variant="outline" shape="pill" onClick={() => router.push(MOCK_ROUTES.list)}>
+          <ArrowLeft size={16} /> Back to all tests
         </Button>
-      </div>
+      </PageBody>
     );
   }
 
+  const bands = Object.entries(pkg.last_attempt?.band_scores ?? {}).filter(
+    (entry): entry is [keyof typeof SKILL_COLOR, number] => typeof entry[1] === "number"
+  );
+  const leadSkill = pkg.sections[0]?.skill ?? pkg.skills[0] ?? "READING";
+  const tint = pkg.package_type === "FULL" ? "#f1e4fc" : SKILL_TINT[leadSkill];
+  const statusTone = inProgress ? "working" : done ? "done" : "empty";
+
   return (
-    <div className="p-4 sm:p-8 max-w-4xl mx-auto animate-in fade-in duration-500">
-      <button
-        type="button"
-        onClick={() => router.push(MOCK_ROUTES.list)}
-        className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-brand-purple transition-colors mb-8 bg-white/50 px-4 py-2 rounded-full w-fit backdrop-blur-sm"
+    <div className="mx-auto max-w-[1320px] px-3 pt-4 sm:px-5 lg:px-8">
+      <Link
+        href={MOCK_ROUTES.list}
+        className="mb-3 ml-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[14px] text-slate-600 hover:bg-slate-100 hover:text-slate-900"
       >
-        <ArrowLeft size={16} /> Kembali ke Daftar Tes
-      </button>
+        <ArrowLeft size={15} /> All mock tests
+      </Link>
 
-      <div className="relative mb-8 p-1 bg-gradient-to-r from-slate-800 to-slate-900 rounded-[32px] shadow-xl overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-purple/20 rounded-full blur-3xl mix-blend-screen" />
-        <div className="relative bg-slate-900/50 backdrop-blur-xl rounded-[31px] p-8 sm:p-12 text-white border border-white/10">
-          <div className="flex flex-wrap gap-2 mb-4">
-            {pkg.skills.map((skill) => (
-              <span
-                key={skill}
-                className="bg-brand-cyan/20 text-brand-cyan px-3 py-1 rounded-md font-bold text-xs uppercase tracking-widest border border-brand-cyan/30"
-              >
-                {SKILL_LABELS[skill]}
-              </span>
-            ))}
+      {/* Hero kanvas: judul, aksi, dan karakter pemandu skill pertama. */}
+      <Canvas tint={tint} className="grid lg:grid-cols-[1.4fr_1fr]">
+        <div className="relative z-10 px-7 py-10 sm:px-12 sm:py-14">
+          <div className="flex flex-wrap gap-2">
+            <Chip color={{ bg: "#ffffff", fg: "#323338" }}>
+              {pkg.package_type === "FULL" ? "Full test · 4 skills" : `${SKILL_LABELS[leadSkill]} practice`}
+            </Chip>
+            <Chip color={STATUS_COLOR[statusTone]}>
+              {inProgress ? "In progress" : done ? "Completed" : "Not started"}
+            </Chip>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black mb-4 tracking-tight">{pkg.title}</h1>
-          <p className="text-slate-300 text-lg max-w-xl">
-            {pkg.description ??
-              "Kerjakan dengan fokus, perhatikan waktu, dan pastikan koneksi internet stabil."}
-          </p>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="md:col-span-2 space-y-6">
-          <Card className="p-6 sm:p-8 rounded-[24px] border-slate-100 shadow-sm bg-white/80 backdrop-blur-sm">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <Target className="text-brand-purple" /> Susunan Ujian
-            </h2>
-            <ul className="divide-y divide-slate-100">
-              {pkg.sections.map((section) => (
-                <li key={section.skill} className="flex items-center justify-between py-3">
-                  <span className="font-bold text-slate-700">{SKILL_LABELS[section.skill]}</span>
-                  <span className="text-sm font-medium text-slate-500">
-                    {section.total_marks} soal · {section.duration_minutes} menit
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Card>
+          <h1 className="mt-5 font-display text-[34px] font-normal leading-[1.1] tracking-[-0.02em] text-slate-900 sm:text-[46px]">
+            {pkg.title}
+          </h1>
+          {pkg.description && (
+            <p className="mt-4 max-w-[52ch] text-[16px] leading-relaxed text-slate-700">{pkg.description}</p>
+          )}
 
-          <div className="bg-orange-50 border border-orange-100 p-6 rounded-[24px] flex items-start gap-4">
-            <AlertTriangle className="text-orange-500 shrink-0" />
-            <div>
-              <h4 className="font-bold text-orange-900 mb-1">Waktu tetap berjalan</h4>
-              <p className="text-orange-700 text-sm font-medium">
-                Jawaban tersimpan otomatis. Kalau kamu menutup browser, waktu tetap berjalan di
-                server dan kamu bisa melanjutkan dari perangkat mana pun sebelum waktu habis.
-              </p>
-            </div>
-          </div>
-        </div>
+          <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
+            <Stat label="Duration" value={<>{pkg.duration_minutes}<span className="text-[15px] text-slate-600"> minutes</span></>} />
+            <Stat label="Questions" value={pkg.total_marks} />
+            {bands.length > 0 && (
+              <div>
+                <dt className="text-[13px] text-slate-600">Latest band</dt>
+                <dd className="mt-1.5 flex flex-wrap gap-1.5">
+                  {bands.map(([skill, band]) => (
+                    <Chip key={skill} color={SKILL_COLOR[skill]}>
+                      {SKILL_LABELS[skill]} <span className="tabular">{band.toFixed(1)}</span>
+                    </Chip>
+                  ))}
+                </dd>
+              </div>
+            )}
+          </dl>
 
-        <div className="space-y-4">
-          <Card className="p-6 rounded-[24px] border-slate-100 shadow-sm bg-white/80 backdrop-blur-sm flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 mb-4">
-              <Clock size={32} />
-            </div>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Durasi</p>
-            <h3 className="text-3xl font-black text-slate-800 mb-6">{pkg.duration_minutes} Min</h3>
-
+          <div className="mt-9 flex flex-wrap gap-3">
             <Button
+              variant="dark"
+              shape="pill"
+              size="lg"
               onClick={handleStart}
               disabled={startAttempt.isPending || pkg.total_marks === 0}
-              className="w-full h-14 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-purple text-white font-black shadow-lg shadow-brand-purple/20 hover:scale-[1.02] transition-all text-lg disabled:opacity-60 disabled:hover:scale-100"
             >
-              {startAttempt.isPending ? (
-                <Loader2 className="animate-spin" size={20} />
-              ) : (
-                <>
-                  {inProgress ? "Lanjutkan Ujian" : "Mulai Ujian"}
-                  <MonitorPlay className="ml-2" size={20} />
-                </>
-              )}
+              {startAttempt.isPending ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} className="fill-current" />}
+              {inProgress ? "Resume test" : done ? "Take it again" : "Start test"}
             </Button>
-
-            {startAttempt.isError && (
-              <p className="mt-3 text-sm font-medium text-red-600">
-                {readErrorMessage(startAttempt.error)}
-              </p>
+            {done && pkg.last_attempt && (
+              <Button
+                variant="outline"
+                shape="pill"
+                size="lg"
+                className="border-slate-800 bg-transparent hover:bg-white/60"
+                onClick={() => router.push(MOCK_ROUTES.result(pkg.id, pkg.last_attempt!.id))}
+              >
+                View latest results
+              </Button>
             )}
-          </Card>
+          </div>
+
+          {startAttempt.isError && (
+            <p role="alert" className="mt-6 max-w-[52ch] rounded-2xl bg-white px-4 py-3 text-[14px] text-[#b12a41]">
+              {readErrorMessage(startAttempt.error)}
+            </p>
+          )}
         </div>
+
+        <div className="relative hidden min-h-[380px] lg:block">
+          <CharacterFigure
+            skill={leadSkill}
+            priority
+            sizes="420px"
+            className="absolute bottom-0 left-1/2 h-[92%] w-[86%] -translate-x-1/2"
+          />
+        </div>
+      </Canvas>
+
+      {/* Susunan ujian sebagai alur, seperti alur otomasi di situs monday. */}
+      <div className="mx-auto max-w-[1240px] px-2 pt-16 sm:px-0 lg:px-0">
+        <Canvas tint="#ecedf5" className="grid gap-10 p-3 sm:p-4 lg:grid-cols-[1.1fr_1fr] lg:gap-0">
+          <div className="rounded-3xl bg-white px-6 py-8 sm:px-10">
+            <ol className="relative mx-auto max-w-[420px] space-y-4">
+              <span className="absolute bottom-10 left-[31px] top-10 w-px bg-slate-300" aria-hidden="true" />
+              {pkg.sections.map((section) => (
+                <li
+                  key={section.skill}
+                  className="relative flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-3 shadow-[0_6px_20px_-12px_rgb(24_27_52/0.25)]"
+                >
+                  <CharacterTile skill={section.skill} size={40} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[15px] text-slate-900">
+                      <span className="font-semibold">{SKILL_LABELS[section.skill]}</span> begins
+                    </p>
+                    <p className="tabular text-[13px] text-slate-600">
+                      {section.total_marks} questions · {section.duration_minutes} min
+                    </p>
+                  </div>
+                  <span
+                    className="size-3 shrink-0 rounded-full"
+                    style={{ backgroundColor: SKILL_COLOR[section.skill].bg }}
+                    aria-hidden="true"
+                  />
+                </li>
+              ))}
+              <li className="relative flex items-center gap-4 rounded-2xl border border-dashed border-slate-300 bg-white p-3">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-[#00c875] text-slate-900">
+                  <Flag size={18} aria-hidden="true" />
+                </span>
+                <p className="text-[15px] text-slate-900">
+                  Submit, and your <span className="font-semibold">band estimate</span> appears
+                </p>
+              </li>
+            </ol>
+          </div>
+
+          <div className="flex flex-col justify-center px-6 pb-8 sm:px-10 lg:py-10">
+            <h2 className="font-display text-[30px] font-normal leading-[1.15] text-slate-900 sm:text-[38px]">
+              Test structure
+            </h2>
+            <p className="mt-4 max-w-[46ch] text-[16px] leading-relaxed text-slate-700">
+              Sections run in order, each with its own time limit. You can flag questions you're unsure about and
+              come back to them before submitting.
+            </p>
+            <div className="mt-6 flex max-w-[46ch] gap-3 rounded-2xl bg-white p-4 text-[14px] leading-relaxed text-slate-700">
+              <Timer size={18} className="mt-0.5 shrink-0 text-[#b86e00]" aria-hidden="true" />
+              <p>
+                The timer runs on the server from the moment you start. Answers save automatically, so you can continue
+                on another device before time runs out.
+              </p>
+            </div>
+          </div>
+        </Canvas>
       </div>
     </div>
   );

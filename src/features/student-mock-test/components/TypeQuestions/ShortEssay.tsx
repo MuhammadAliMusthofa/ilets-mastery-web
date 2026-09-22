@@ -2,66 +2,52 @@
 
 import React from "react";
 import { cn } from "@/src/libs/utils";
+import { QuestionNumber, QuestionText } from "./QuestionNumber";
 
 interface IShortEssayProps {
-  questionId: number; // Biar seragam ada nomor soalnya
+  questionId: number;
   question: string;
   value: string[];
   onChange: (value: string, index: number) => void;
   column?: number;
 }
 
-export function ShortEssay({
-  questionId,
-  question,
-  value,
-  onChange,
-  column = 1,
-}: IShortEssayProps) {
+/**
+ * Isian singkat. Tiap kotak diberi nomor soal aslinya (mis. 9–14) sekaligus
+ * penanda urutan (1)…(n) yang dipakai di teks soal.
+ */
+export function ShortEssay({ questionId, question, value, onChange, column = 1 }: IShortEssayProps) {
   return (
-    <div className="space-y-6">
-      
-      {/* 1. QUESTION TEXT (Stimulus/Instruksi Soal) */}
-      <div className="font-semibold text-slate-800 text-base leading-relaxed flex gap-3">
-        <span className="font-black text-brand-purple shrink-0">{questionId}.</span>
-        
-        {/* Render HTML untuk teks pertanyaan */}
-        <div 
-          className="prose prose-slate max-w-none text-slate-700 w-full"
-          dangerouslySetInnerHTML={{ __html: question }} 
-        />
+    <div className="space-y-5">
+      <div className="flex gap-3">
+        <QuestionNumber value={column > 1 ? `${questionId}–${questionId + column - 1}` : questionId} className="mt-0.5" />
+        <QuestionText html={question} className="[&>p:first-child]:mt-0" />
       </div>
 
-      {/* 2. INPUT FIELDS (Kotak Isian) */}
-      <div className="space-y-4 pl-2 sm:pl-7">
-        {Array.from({ length: column }).map((_, index) => (
-          <div key={index} className="flex flex-col gap-1.5 group">
-            
-            {/* Label opsional kalau isiannya lebih dari 1 */}
-            {column > 1 && (
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1 transition-colors group-focus-within:text-brand-purple">
-                Answer {index + 1}
+      <div className="grid gap-3 sm:grid-cols-2 sm:pl-9">
+        {Array.from({ length: column }).map((_, index) => {
+          const inputId = `q-${questionId}-blank-${index}`;
+          const filled = !!value[index]?.trim();
+
+          return (
+            <div key={index} className="flex items-center gap-3">
+              <label htmlFor={inputId} className="flex w-[88px] shrink-0 items-center gap-1.5 text-[13px] text-slate-500">
+                <QuestionNumber value={questionId + index} className={cn(!filled && "bg-slate-500")} />
+                {column > 1 && <span className="tabular">({index + 1})</span>}
               </label>
-            )}
-            
-            <input
-              type="text"
-              autoComplete="off"
-              placeholder={column > 1 ? `Type answer ${index + 1}...` : "Type your answer here..."}
-              value={value[index] || ""}
-              onChange={(e) => onChange(e.target.value, index)}
-              className={cn(
-                "w-full px-4 py-3.5 bg-white border-2 rounded-xl outline-none transition-all font-medium text-slate-800 placeholder:text-slate-300 placeholder:font-normal",
-                // State kalau input lagi kosong vs ada isinya
-                value[index] ? "border-brand-purple/30 bg-brand-purple/5" : "border-slate-100 hover:border-slate-200",
-                // State kalau lagi di-klik (focus)
-                "focus:border-brand-purple focus:ring-4 focus:ring-brand-purple/10 focus:bg-white"
-              )}
-            />
-          </div>
-        ))}
+              <input
+                id={inputId}
+                type="text"
+                autoComplete="off"
+                spellCheck={false}
+                value={value[index] || ""}
+                onChange={(event) => onChange(event.target.value, index)}
+                className="h-10 w-full rounded-[4px] border border-slate-300 bg-white px-3 text-[15px] text-slate-800 transition-colors duration-150 hover:border-slate-800 focus:border-primary-500 focus:outline-none"
+              />
+            </div>
+          );
+        })}
       </div>
-
     </div>
   );
 }

@@ -59,7 +59,7 @@ describe('PassageAdminContainer', () => {
     renderWithQuery(<PassageAdminContainer />);
     await screen.findByText('Community Notice Board');
 
-    await userEvent.selectOptions(screen.getByLabelText(/Filter skill/i), 'LISTENING');
+    await userEvent.selectOptions(screen.getByLabelText(/Filter by skill/i), 'LISTENING');
 
     expect(ieltsAdminService.passages.list).toHaveBeenCalledWith({ skill: 'LISTENING' });
   });
@@ -68,10 +68,10 @@ describe('PassageAdminContainer', () => {
     renderWithQuery(<PassageAdminContainer />);
     await screen.findByText('Community Notice Board');
 
-    await userEvent.click(screen.getByRole('button', { name: /Passage Baru/i }));
-    await userEvent.type(screen.getByLabelText(/^Judul/i), 'Job Description');
-    await userEvent.type(screen.getByLabelText(/^Isi/i), '<p>Duties</p>');
-    await userEvent.click(screen.getByRole('button', { name: /^Simpan$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /New passage/i }));
+    await userEvent.type(screen.getByLabelText(/^Title/i), 'Job Description');
+    await userEvent.type(screen.getByLabelText(/^Content/i), '<p>Duties</p>');
+    await userEvent.click(screen.getByRole('button', { name: /^Save$/i }));
 
     expect(ieltsAdminService.passages.create).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Job Description', content: '<p>Duties</p>' })
@@ -82,7 +82,7 @@ describe('PassageAdminContainer', () => {
     renderWithQuery(<PassageAdminContainer />);
     await screen.findByText('Community Notice Board');
 
-    await userEvent.click(screen.getByRole('button', { name: /Passage Baru/i }));
+    await userEvent.click(screen.getByRole('button', { name: /New passage/i }));
     await userEvent.selectOptions(screen.getByLabelText(/^Skill/i), 'READING');
 
     const sectionSelect = screen.getByLabelText(/^Section/i) as HTMLSelectElement;

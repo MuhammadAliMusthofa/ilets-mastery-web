@@ -6,6 +6,17 @@ export const API_ENDPOINTS = {
     resendOtp: "/auth/resend-otp",
     logout: "/auth/logout",
   },
+  basic: {
+    curriculum: "/basic/curriculum",
+    lesson: (id: number) => `/basic/lessons/${id}`,
+    completeLesson: (id: number) => `/basic/lessons/${id}/complete`,
+    unit: (id: number) => `/basic/units/${id}`,
+    level: (key: string) => `/basic/levels/${key}`,
+    plan: "/basic/plan",
+    planPreview: "/basic/plan/preview",
+    planReschedule: "/basic/plan/reschedule",
+    completeTask: (id: number) => `/basic/plan/tasks/${id}/complete`,
+  },
   modules: {
     list: "/modules",
     enroll: (key: string) => `/modules/${key}/enroll`,

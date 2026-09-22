@@ -51,14 +51,14 @@ describe('QuestionAdminContainer', () => {
     renderWithQuery(<QuestionAdminContainer />);
 
     expect(await screen.findByText('When does the library open?')).toBeInTheDocument();
-    expect(screen.getByText('Pilihan Ganda')).toBeInTheDocument();
+    expect(screen.getByText('Multiple choice')).toBeInTheDocument();
   });
 
   it('menyaring berdasarkan skill', async () => {
     renderWithQuery(<QuestionAdminContainer />);
     await screen.findByText('When does the library open?');
 
-    await userEvent.selectOptions(screen.getByLabelText(/Filter skill/i), 'WRITING');
+    await userEvent.selectOptions(screen.getByLabelText(/Filter by skill/i), 'WRITING');
 
     expect(ieltsAdminService.questions.list).toHaveBeenCalledWith(
       expect.objectContaining({ skill: 'WRITING' })
@@ -69,25 +69,25 @@ describe('QuestionAdminContainer', () => {
     renderWithQuery(<QuestionAdminContainer />);
     await screen.findByText('When does the library open?');
 
-    await userEvent.click(screen.getByRole('button', { name: /Soal Baru/i }));
-    expect(screen.getByLabelText('Teks pilihan A')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /New question/i }));
+    expect(screen.getByLabelText('Option A text')).toBeInTheDocument();
 
-    await userEvent.selectOptions(screen.getByLabelText(/^Tipe soal/i), 'SHORT_ANSWER');
+    await userEvent.selectOptions(screen.getByLabelText(/^Question type/i), 'SHORT_ANSWER');
 
-    expect(screen.queryByLabelText('Teks pilihan A')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Jawaban diterima untuk kotak 1')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Option A text')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Accepted answers for blank 1')).toBeInTheDocument();
   });
 
   it('mengirim soal baru lengkap dengan payload sesuai tipenya', async () => {
     renderWithQuery(<QuestionAdminContainer />);
     await screen.findByText('When does the library open?');
 
-    await userEvent.click(screen.getByRole('button', { name: /Soal Baru/i }));
-    await userEvent.type(screen.getByLabelText(/^Teks pertanyaan/i), 'Kapan perpustakaan buka?');
-    await userEvent.type(screen.getByLabelText('Teks pilihan A'), 'Jam 8');
-    await userEvent.type(screen.getByLabelText('Teks pilihan B'), 'Jam 9');
-    await userEvent.click(screen.getByLabelText('Jadikan B jawaban benar'));
-    await userEvent.click(screen.getByRole('button', { name: /^Simpan$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /New question/i }));
+    await userEvent.type(screen.getByLabelText(/^Question text/i), 'Kapan perpustakaan buka?');
+    await userEvent.type(screen.getByLabelText('Option A text'), 'Jam 8');
+    await userEvent.type(screen.getByLabelText('Option B text'), 'Jam 9');
+    await userEvent.click(screen.getByLabelText('Mark B as correct'));
+    await userEvent.click(screen.getByRole('button', { name: /^Save$/i }));
 
     expect(ieltsAdminService.questions.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -110,9 +110,9 @@ describe('QuestionAdminContainer', () => {
     renderWithQuery(<QuestionAdminContainer />);
     await screen.findByText('When does the library open?');
 
-    await userEvent.click(screen.getByRole('button', { name: /Soal Baru/i }));
-    await userEvent.type(screen.getByLabelText(/^Teks pertanyaan/i), 'Soal');
-    await userEvent.click(screen.getByRole('button', { name: /^Simpan$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /New question/i }));
+    await userEvent.type(screen.getByLabelText(/^Question text/i), 'Soal');
+    await userEvent.click(screen.getByRole('button', { name: /^Save$/i }));
 
     expect(
       await screen.findByText(/Jawaban "Z" tidak ada di daftar options/i)

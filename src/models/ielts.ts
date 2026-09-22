@@ -15,12 +15,12 @@ export const DIFFICULTIES = ["EASY", "MEDIUM", "HARD"] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  MULTIPLE_CHOICE: "Pilihan Ganda",
-  MULTIPLE_CHOICE_COMPLEX: "Pilihan Ganda (jawaban lebih dari satu)",
+  MULTIPLE_CHOICE: "Multiple choice",
+  MULTIPLE_CHOICE_COMPLEX: "Multiple choice (more than one answer)",
   TRUE_FALSE_NOT_GIVEN: "True / False / Not Given",
-  SHORT_ANSWER: "Isian Singkat",
-  LONG_ESSAY: "Esai (Writing Task)",
-  MAP_LABELING: "Pelabelan Denah",
+  SHORT_ANSWER: "Short answer",
+  LONG_ESSAY: "Essay (Writing task)",
+  MAP_LABELING: "Map labelling",
 };
 
 export const SKILL_LABELS: Record<Skill, string> = {

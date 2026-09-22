@@ -3,8 +3,8 @@
 import LoginContainer from "@/src/features/auth/containers/LoginContainer";
 
 export const metadata = {
-  title: "Login | IELTS Platform",
-  description: "Masuk ke platform ujian IELTS",
+  title: "Sign in",
+  description: "Sign in to IELTS Vibe.",
 };
 
 export default function LoginPage() {

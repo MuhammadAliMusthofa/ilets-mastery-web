@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MockTestDetailContainer from "@/src/features/student-mock-test/containers/MockTestDetailContainer";
+
+export const metadata: Metadata = { title: "Test details" };
 
 interface DetailPageProps {
   params: Promise<{ testId: string }>;

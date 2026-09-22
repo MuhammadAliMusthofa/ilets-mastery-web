@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"; // <-- Huruf kecil 'card'
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
@@ -17,6 +16,7 @@ import { authService } from "../services/auth.service";
 import { useAuthStore } from "@/src/store/authStore";
 import { isAdminRole, type AuthUser } from "@/src/models/auth";
 import Link from "next/link";
+import { AuthFrame, AuthNotice } from "../components/AuthFrame";
 
 export default function LoginContainer() {
     const router = useRouter();
@@ -48,105 +48,58 @@ export default function LoginContainer() {
             router.push(isAdminRole(user.role) ? "/admin" : "/dashboard");
         } catch (error: any) {
             console.error("Login Error:", error);
-            setErrorMsg(error.response?.data?.message || "Gagal login, periksa kembali email & password Anda.");
+            setErrorMsg(error.response?.data?.message || "Couldn't sign in. Check your email and password.");
         } finally {
             setIsLoading(false);
         }
     }
 
     return (
-        <main className="relative flex min-h-screen items-center justify-center p-4 bg-slate-50 overflow-hidden">
+        <AuthFrame title="Sign in to IELTS Vibe" description="Pick up your practice right where you left off.">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                    {errorMsg && <AuthNotice tone="error">{errorMsg}</AuthNotice>}
 
-            {/* Dekorasi Background dengan warna Logo Lu */}
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-cyan rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-pulse" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-purple rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-pulse" />
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-[14px] font-medium text-slate-800">Email</FormLabel>
+                                <FormControl>
+                                    <Input type="email" placeholder="name@email.com" className="h-12 rounded-xl px-4 text-[15px]" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-            {/* 🔥 PERBAIKAN DI SINI: Class kaca (backdrop-blur & border-white/60) DIHAPUS! */}
-            <Card variant="gradientBrand" className="w-full max-w-md shadow-2xl">
-                <CardHeader className="text-center pb-2">
-                    {/* Judul Teks pakai Gradasi Logo */}
-                    <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-cyan to-brand-purple mb-2">
-                        Welcome Back
-                    </CardTitle>
-                    <p className="text-slate-500 text-sm">
-                        Sign in to continue your IELTS preparation
-                    </p>
-                </CardHeader>
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-[14px] font-medium text-slate-800">Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" placeholder="••••••••" className="h-12 rounded-xl px-4 text-[15px]" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                <CardContent className="space-y-6 mt-4">
+                    <Button type="submit" variant="dark" shape="pill" size="lg" className="w-full" disabled={isLoading}>
+                        {isLoading ? "Signing in…" : "Sign in"}
+                    </Button>
+                </form>
+            </Form>
 
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
-                            {errorMsg && (
-                                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
-                                    {errorMsg}
-                                </div>
-                            )}
-
-                            <div className="space-y-4">
-                                {/* FIELD EMAIL */}
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-slate-700">Email Address</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="student@ielts.com"
-                                                    className="bg-white/70 border-slate-200 focus:bg-white"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {/* FIELD PASSWORD */}
-                                <FormField
-                                    control={form.control}
-                                    name="password"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <div className="flex justify-between items-center">
-                                                <FormLabel className="text-slate-700">Password</FormLabel>
-                                                {/* Link hover nyambung sama warna logo */}
-                                                <a href="#" className="text-xs text-brand-purple hover:text-brand-cyan transition-colors">Forgot password?</a>
-                                            </div>
-                                            <FormControl>
-                                                <Input
-                                                    type="password"
-                                                    placeholder="••••••••"
-                                                    className="bg-white/70 border-slate-200 focus:bg-white"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            <Button
-                                type="submit"
-                                variant="gradientOutline"
-                                className="w-full h-12 text-base rounded-xl font-bold tracking-wide"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? "Signing in..." : "Sign In"}
-                            </Button>
-
-                        </form>
-                    </Form>
-
-                    <p className="text-center text-sm text-slate-500">
-                        {"Don't have an account? "}<Link href="/register" className="text-brand-purple font-medium hover:text-brand-cyan transition-colors">Register here</Link>
-                    </p>
-                </CardContent>
-            </Card>
-
-        </main>
+            <p className="mt-8 text-[15px] text-slate-600">
+                Don't have an account?{" "}
+                <Link href="/register" className="font-medium text-slate-900 underline underline-offset-4 hover:text-primary-500">
+                    Create one
+                </Link>
+            </p>
+        </AuthFrame>
     );
 }

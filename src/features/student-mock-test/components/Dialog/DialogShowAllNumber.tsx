@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonNumber, QuestionStatus } from "../Button/ButtonNumber";
@@ -8,12 +8,18 @@ import { ButtonNumber, QuestionStatus } from "../Button/ButtonNumber";
 interface DialogShowAllNumberProps {
   totalQuestions: number;
   activeQuestionIndex: number;
-  // Fungsi untuk ngecek status tiap soal (nanti logic-nya disambung ke Zustand)
-  getQuestionStatus: (index: number) => QuestionStatus; 
-  // Fungsi pas user ngeklik salah satu nomor
+  getQuestionStatus: (index: number) => QuestionStatus;
   onQuestionSelect: (index: number) => void;
 }
 
+const LEGEND: Array<{ label: string; swatch: string }> = [
+  { label: "Current", swatch: "border-2 border-primary-500 bg-primary-50" },
+  { label: "Answered", swatch: "bg-[#00c875]" },
+  { label: "Flagged", swatch: "bg-[#fdab3d]" },
+  { label: "Blank", swatch: "border border-slate-300 bg-white" },
+];
+
+/** Peta soal: lompat ke nomor mana pun tanpa kehilangan jawaban. */
 export function DialogShowAllNumber({
   totalQuestions,
   activeQuestionIndex,
@@ -22,10 +28,13 @@ export function DialogShowAllNumber({
 }: DialogShowAllNumberProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Array untuk merender tombol 1 sampai totalQuestions
-  const questions = Array.from({ length: totalQuestions }, (_, i) => i);
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && setIsOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen]);
 
-  // Handle klik: Tutup modal lalu pindah soal
   const handleNavigate = (index: number) => {
     onQuestionSelect(index);
     setIsOpen(false);
@@ -33,81 +42,54 @@ export function DialogShowAllNumber({
 
   return (
     <>
-      {/* --- TOMBOL TRIGGER --- */}
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={() => setIsOpen(true)}
-        className="text-brand-cyan font-bold hover:bg-brand-cyan/10"
-      >
-        <LayoutGrid size={18} className="mr-2" />
-        Lihat Semua Nomor
+      <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
+        <LayoutGrid size={16} />
+        Question map
       </Button>
 
-      {/* --- MODAL OVERLAY --- */}
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          
-          {/* DIALOG BOX */}
-          <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
-            
-            {/* Header Modal */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-white z-10">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/40 p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="peta-soal-title"
+            className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl"
+          >
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
               <div>
-                <h2 className="text-xl font-black text-slate-800">Peta Soal</h2>
-                <p className="text-sm font-medium text-slate-500">Lompat ke nomor yang kamu inginkan.</p>
+                <h2 id="peta-soal-title" className="text-lg font-semibold text-slate-800">Question map</h2>
+                <p className="text-[13px] text-slate-500">Pick a number to jump straight to it. Your answers stay saved.</p>
               </div>
-              <button 
+              <button
+                type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                className="flex size-8 items-center justify-center rounded-[4px] text-slate-500 hover:bg-[#dcdfec] hover:text-slate-800"
+                aria-label="Close question map"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            {/* Body Modal (Bisa di-scroll kalau soalnya sampe 50+) */}
-            <div className="p-6 overflow-y-auto custom-scrollbar bg-slate-50/50">
-              
-              {/* Legend Singkat */}
-              <div className="flex flex-wrap gap-4 mb-6 p-4 bg-white rounded-xl border border-slate-200">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded bg-brand-cyan/20 border-2 border-brand-cyan" />
-                  <span className="text-xs font-bold text-slate-600">Saat Ini</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded bg-brand-purple/10 border-2 border-brand-purple" />
-                  <span className="text-xs font-bold text-slate-600">Terjawab</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded bg-white border-2 border-slate-200" />
-                  <span className="text-xs font-bold text-slate-600">Kosong</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded bg-orange-100 border-2 border-orange-400" />
-                  <span className="text-xs font-bold text-slate-600">Ragu</span>
-                </div>
+            <div className="overflow-y-auto px-6 py-5">
+              <ul className="mb-5 flex flex-wrap gap-x-5 gap-y-2">
+                {LEGEND.map((item) => (
+                  <li key={item.label} className="flex items-center gap-2 text-[13px] text-slate-700">
+                    <span className={`size-3.5 rounded-[3px] ${item.swatch}`} aria-hidden="true" />
+                    {item.label}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="grid grid-cols-6 gap-2 sm:grid-cols-10">
+                {Array.from({ length: totalQuestions }, (_, index) => (
+                  <ButtonNumber
+                    key={index}
+                    number={index + 1}
+                    status={index === activeQuestionIndex ? "active" : getQuestionStatus(index)}
+                    onClick={() => handleNavigate(index)}
+                  />
+                ))}
               </div>
-
-              {/* Grid Nomor Soal */}
-              <div className="grid grid-cols-5 sm:grid-cols-8 gap-3">
-                {questions.map((index) => {
-                  const number = index + 1;
-                  // Kalau nomor ini lagi dikerjain, paksa statusnya jadi "active"
-                  const status = index === activeQuestionIndex 
-                    ? "active" 
-                    : getQuestionStatus(index);
-
-                  return (
-                    <ButtonNumber
-                      key={number}
-                      number={number}
-                      status={status}
-                      onClick={() => handleNavigate(index)}
-                    />
-                  );
-                })}
-              </div>
-
             </div>
           </div>
         </div>

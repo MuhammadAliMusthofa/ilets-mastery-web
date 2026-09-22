@@ -4,6 +4,22 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { usePassages, useCreatePassage, useDeletePassage } from "../hooks/usePassages";
 import { SKILLS, SKILL_LABELS, type Skill } from "@/src/models/ielts";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/src/libs/utils";
+import { PageBody, PageHeader } from "@/src/_global/components/Shell/AppShell";
+import {
+  BoardBody,
+  BoardCell,
+  BoardGroup,
+  BoardHead,
+  BoardHeadCell,
+  BoardRow,
+  BoardTable,
+  FillLabel,
+  StatusPill,
+} from "@/src/_global/components/Board/Board";
+import { SKILL_COLOR } from "@/src/_global/design/tokens";
+import { fieldClass, formPanelClass, labelClass, textareaClass } from "../components/fields";
 
 // Dibatasi mengikuti format GT supaya admin tidak bisa membuat Reading
 // section 4 yang pasti ditolak backend.
@@ -28,9 +44,7 @@ export function PassageAdminContainer() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
-  const { data: passages, isLoading, isError } = usePassages(
-    filterSkill ? { skill: filterSkill } : {}
-  );
+  const { data: passages, isLoading, isError } = usePassages(filterSkill ? { skill: filterSkill } : {});
   const createPassage = useCreatePassage();
   const deletePassage = useDeletePassage();
 
@@ -64,190 +78,191 @@ export function PassageAdminContainer() {
   };
 
   return (
-    <div>
-      <div className="mb-8 flex items-end justify-between">
-        <div>
-          <h2 className="text-2xl font-black text-slate-800">Passage</h2>
-          <p className="mt-1 text-slate-500">
-            Teks bacaan dan audio yang menjadi induk soal.
-          </p>
+    <>
+      <PageHeader
+        title="Passage"
+        description="Reading texts and audio that questions are attached to."
+        actions={
+          <Button onClick={() => setShowForm((prev) => !prev)}>
+            <Plus size={16} /> New passage
+          </Button>
+        }
+      />
+      <PageBody>
+        <div className="mb-6 flex items-center gap-3">
+          <label htmlFor="filter-skill" className="text-[14px] text-slate-700">
+            Filter by skill
+          </label>
+          <select
+            id="filter-skill"
+            value={filterSkill}
+            onChange={(event) => setFilterSkill(event.target.value as Skill | "")}
+            className={cn(fieldClass, "w-auto min-w-[160px]")}
+          >
+            <option value="">All</option>
+            {SKILLS.map((skill) => (
+              <option key={skill} value={skill}>
+                {SKILL_LABELS[skill]}
+              </option>
+            ))}
+          </select>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowForm((prev) => !prev)}
-          className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 font-bold text-white"
-        >
-          <Plus size={18} /> Passage Baru
-        </button>
-      </div>
 
-      <div className="mb-6">
-        <label htmlFor="filter-skill" className="mr-2 text-sm font-medium text-slate-600">
-          Filter skill
-        </label>
-        <select
-          id="filter-skill"
-          value={filterSkill}
-          onChange={(event) => setFilterSkill(event.target.value as Skill | "")}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-        >
-          <option value="">Semua</option>
-          {SKILLS.map((skill) => (
-            <option key={skill} value={skill}>
-              {SKILL_LABELS[skill]}
-            </option>
-          ))}
-        </select>
-      </div>
+        {showForm && (
+          <div className={formPanelClass}>
+            <h2 className="mb-5 text-[16px] font-medium text-slate-800">New passage</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label htmlFor="form-skill" className={labelClass}>
+                  Skill
+                </label>
+                <select
+                  id="form-skill"
+                  value={form.skill}
+                  onChange={(event) => handleSkillChange(event.target.value as Skill)}
+                  className={fieldClass}
+                >
+                  {SKILLS.map((skill) => (
+                    <option key={skill} value={skill}>
+                      {SKILL_LABELS[skill]}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-      {showForm && (
-        <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label htmlFor="form-skill" className="mb-1 block text-sm font-medium text-slate-700">
-                Skill
-              </label>
-              <select
-                id="form-skill"
-                value={form.skill}
-                onChange={(event) => handleSkillChange(event.target.value as Skill)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              >
-                {SKILLS.map((skill) => (
-                  <option key={skill} value={skill}>
-                    {SKILL_LABELS[skill]}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="form-section"
-                className="mb-1 block text-sm font-medium text-slate-700"
-              >
-                Section
-              </label>
-              <select
-                id="form-section"
-                value={form.section_no}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, section_no: Number(event.target.value) }))
-                }
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              >
-                {Array.from({ length: MAX_SECTION[form.skill] }, (_unused, index) => index + 1).map(
-                  (no) => (
+              <div>
+                <label htmlFor="form-section" className={labelClass}>
+                  Section
+                </label>
+                <select
+                  id="form-section"
+                  value={form.section_no}
+                  onChange={(event) => setForm((prev) => ({ ...prev, section_no: Number(event.target.value) }))}
+                  className={fieldClass}
+                >
+                  {Array.from({ length: MAX_SECTION[form.skill] }, (_unused, index) => index + 1).map((no) => (
                     <option key={no} value={no}>
                       Section {no}
                     </option>
-                  )
-                )}
-              </select>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <label htmlFor="form-title" className="mb-1 block text-sm font-medium text-slate-700">
-              Judul
-            </label>
-            <input
-              id="form-title"
-              value={form.title}
-              onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div className="mt-4">
-            <label htmlFor="form-content" className="mb-1 block text-sm font-medium text-slate-700">
-              Isi (HTML)
-            </label>
-            <textarea
-              id="form-content"
-              rows={6}
-              value={form.content}
-              onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm"
-            />
-          </div>
-
-          <div className="mt-4">
-            <label htmlFor="form-audio" className="mb-1 block text-sm font-medium text-slate-700">
-              URL audio (khusus Listening)
-            </label>
-            <input
-              id="form-audio"
-              value={form.audio_url}
-              onChange={(event) => setForm((prev) => ({ ...prev, audio_url: event.target.value }))}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-          </div>
-
-          {createPassage.isError && (
-            <p className="mt-4 text-sm text-red-600">
-              Gagal menyimpan passage. Periksa kembali isian Anda.
-            </p>
-          )}
-
-          <div className="mt-6 flex gap-2">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={createPassage.isPending}
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-            >
-              Simpan
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium"
-            >
-              Batal
-            </button>
-          </div>
-        </div>
-      )}
-
-      {isLoading && <p className="text-sm text-slate-500">Memuat passage…</p>}
-      {isError && <p className="text-sm text-red-600">Gagal memuat passage.</p>}
-
-      <div className="space-y-3">
-        {passages?.map((passage) => (
-          <article
-            key={passage.id}
-            className="flex items-start justify-between rounded-xl border border-slate-200 bg-white p-4"
-          >
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-bold text-slate-800">{passage.title}</h3>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                  {SKILL_LABELS[passage.skill]} · Section {passage.section_no}
-                </span>
-                <span
-                  className={
-                    passage.is_published
-                      ? "rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700"
-                      : "rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700"
-                  }
-                >
-                  {passage.is_published ? "Terbit" : "Draft"}
-                </span>
+                  ))}
+                </select>
               </div>
             </div>
 
-            <button
-              type="button"
-              aria-label={`Hapus ${passage.title}`}
-              onClick={() => deletePassage.mutate(passage.id)}
-              className="text-slate-400 hover:text-red-600"
-            >
-              <Trash2 size={18} />
-            </button>
-          </article>
-        ))}
-      </div>
-    </div>
+            <div className="mt-4">
+              <label htmlFor="form-title" className={labelClass}>
+                Title
+              </label>
+              <input
+                id="form-title"
+                value={form.title}
+                onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                className={fieldClass}
+              />
+            </div>
+
+            <div className="mt-4">
+              <label htmlFor="form-content" className={labelClass}>
+                Content (HTML)
+              </label>
+              <textarea
+                id="form-content"
+                rows={6}
+                value={form.content}
+                onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
+                className={cn(textareaClass, "font-mono")}
+              />
+            </div>
+
+            <div className="mt-4">
+              <label htmlFor="form-audio" className={labelClass}>
+                Audio URL (Listening only)
+              </label>
+              <input
+                id="form-audio"
+                value={form.audio_url}
+                onChange={(event) => setForm((prev) => ({ ...prev, audio_url: event.target.value }))}
+                className={fieldClass}
+              />
+            </div>
+
+            {createPassage.isError && (
+              <p role="alert" className="mt-4 text-[14px] text-[#b12a41]">
+                Couldn't save the passage. Check your entries.
+              </p>
+            )}
+
+            <div className="mt-6 flex gap-2">
+              <Button onClick={handleSubmit} disabled={createPassage.isPending}>
+                Save
+              </Button>
+              <Button variant="ghost" onClick={() => setShowForm(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {isLoading && <p className="text-sm text-slate-500">Loading passages…</p>}
+        {isError && <p className="text-sm text-[#b12a41]">Couldn't load passages.</p>}
+
+        {passages && (
+          <BoardGroup title="All passages" color="#784bd1" meta={`${passages.length} passages`}>
+            <BoardTable>
+              <BoardHead>
+                <BoardHeadCell first align="left" className="w-[44%]">
+                  Title
+                </BoardHeadCell>
+                <BoardHeadCell className="w-[140px]">Skill</BoardHeadCell>
+                <BoardHeadCell className="w-[110px]">Section</BoardHeadCell>
+                <BoardHeadCell className="w-[140px]">Status</BoardHeadCell>
+                <BoardHeadCell className="w-[80px] rounded-tr-lg">
+                  <span className="sr-only">Actions</span>
+                </BoardHeadCell>
+              </BoardHead>
+              <BoardBody>
+                {passages.map((passage, index) => (
+                  <BoardRow key={passage.id}>
+                    <BoardCell first last={index === passages.length - 1} align="left">
+                      <span className="block truncate font-medium text-slate-800">{passage.title}</span>
+                    </BoardCell>
+                    <BoardCell flush>
+                      <FillLabel color={SKILL_COLOR[passage.skill]}>{SKILL_LABELS[passage.skill]}</FillLabel>
+                    </BoardCell>
+                    <BoardCell className="tabular text-slate-700">{passage.section_no}</BoardCell>
+                    <BoardCell flush>
+                      <StatusPill tone={passage.is_published ? "done" : "working"}>
+                        {passage.is_published ? "Published" : "Draft"}
+                      </StatusPill>
+                    </BoardCell>
+                    <BoardCell>
+                      <button
+                        type="button"
+                        aria-label={`Delete ${passage.title}`}
+                        onClick={() => deletePassage.mutate(passage.id)}
+                        className="flex size-8 items-center justify-center rounded-[4px] text-slate-500 hover:bg-[#fdeef1] hover:text-[#b12a41]"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </BoardCell>
+                  </BoardRow>
+                ))}
+                {passages.length === 0 && (
+                  <BoardRow>
+                    <BoardCell first last align="left" className="text-slate-500">
+                      No passages yet.
+                    </BoardCell>
+                    <BoardCell />
+                    <BoardCell />
+                    <BoardCell />
+                    <BoardCell />
+                  </BoardRow>
+                )}
+              </BoardBody>
+            </BoardTable>
+          </BoardGroup>
+        )}
+      </PageBody>
+    </>
   );
 }

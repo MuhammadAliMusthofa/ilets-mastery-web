@@ -32,17 +32,17 @@ function AnswerVariantsInput({
         htmlFor={`blank-${index}`}
         className="mb-1 block text-xs font-medium text-slate-600"
       >
-        Jawaban diterima untuk kotak {index + 1}
+        Accepted answers for blank {index + 1}
       </label>
       <input
         id={`blank-${index}`}
         value={raw}
-        placeholder="pisahkan varian dengan koma, misal: colour, color"
+        placeholder="separate variants with commas, e.g. colour, color"
         onChange={(event) => {
           setRaw(event.target.value);
           onCommit(parseVariants(event.target.value));
         }}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        className="h-10 w-full rounded-[4px] border border-slate-300 bg-white px-3 text-[14px] hover:border-slate-800 focus:border-primary-500 focus:outline-none"
       />
     </div>
   );
@@ -142,9 +142,9 @@ export function QuestionTypeFields({ value, onChange }: QuestionTypeFieldsProps)
 
   if (value.question_type === "LONG_ESSAY") {
     return (
-      <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
-        Tipe ini tidak punya kunci jawaban. Siswa menilai tulisannya sendiri lewat
-        self-assessment berpanduan rubrik band descriptor.
+      <p className="rounded-lg bg-primary-50 px-4 py-3 text-[14px] text-slate-800">
+        This type has no answer key. Students score their own writing through
+        self-assessment guided by the band descriptor rubric.
       </p>
     );
   }
@@ -154,10 +154,10 @@ export function QuestionTypeFields({ value, onChange }: QuestionTypeFieldsProps)
       {usesOptions && (
         <div>
           <p className="mb-2 text-sm font-medium text-slate-700">
-            Pilihan jawaban
+            Answer options
             {allowsMultipleAnswers && (
               <span className="ml-2 text-xs font-normal text-slate-500">
-                centang semua jawaban yang benar
+                tick every correct answer
               </span>
             )}
           </p>
@@ -168,13 +168,13 @@ export function QuestionTypeFields({ value, onChange }: QuestionTypeFieldsProps)
                 <input
                   type={allowsMultipleAnswers ? "checkbox" : "radio"}
                   name="correct-option"
-                  aria-label={`Jadikan ${option.id} jawaban benar`}
+                  aria-label={`Mark ${option.id} as correct`}
                   checked={selected.includes(option.id)}
                   onChange={() => toggleAnswer(option.id)}
                 />
-                <span className="w-6 font-bold text-slate-600">{option.id}</span>
+                <span className="flex size-7 items-center justify-center rounded-[4px] bg-slate-800 text-[13px] font-semibold text-white">{option.id}</span>
                 <input
-                  aria-label={`Teks pilihan ${option.id}`}
+                  aria-label={`Option ${option.id} text`}
                   value={option.text}
                   onChange={(event) =>
                     patch({
@@ -183,13 +183,13 @@ export function QuestionTypeFields({ value, onChange }: QuestionTypeFieldsProps)
                       ),
                     })
                   }
-                  className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  className="h-10 flex-1 rounded-[4px] border border-slate-300 bg-white px-3 text-[14px] hover:border-slate-800 focus:border-primary-500 focus:outline-none"
                 />
                 <button
                   type="button"
-                  aria-label={`Hapus pilihan ${option.id}`}
+                  aria-label={`Remove option ${option.id}`}
                   onClick={() => removeOption(option.id)}
-                  className="text-slate-400 hover:text-red-600"
+                  className="flex size-8 items-center justify-center rounded-[4px] text-slate-500 hover:bg-[#fdeef1] hover:text-[#b12a41]"
                 >
                   <Minus size={16} />
                 </button>
@@ -200,23 +200,23 @@ export function QuestionTypeFields({ value, onChange }: QuestionTypeFieldsProps)
           <button
             type="button"
             onClick={addOption}
-            className="mt-3 flex items-center gap-1 text-sm font-medium text-slate-700"
+            className="mt-3 inline-flex h-8 items-center gap-1 rounded-[4px] px-2 text-[13px] font-medium text-primary-500 hover:bg-primary-50"
           >
-            <Plus size={14} /> Tambah pilihan
+            <Plus size={14} /> Add option
           </button>
         </div>
       )}
 
       {value.question_type === "TRUE_FALSE_NOT_GIVEN" && (
         <div>
-          <p className="mb-2 text-sm font-medium text-slate-700">Jawaban benar</p>
+          <p className="mb-2 text-sm font-medium text-slate-700">Correct answer</p>
           <div className="flex gap-4">
             {TRUE_FALSE_VALUES.map((answer) => (
               <label key={answer} className="flex items-center gap-2 text-sm">
                 <input
                   type="radio"
                   name="tfng-answer"
-                  aria-label={`Jawaban benar: ${answer}`}
+                  aria-label={`Correct answer: ${answer}`}
                   checked={selected.includes(answer)}
                   onChange={() => patch({ accepted_answers: [[answer]] })}
                 />
@@ -231,21 +231,21 @@ export function QuestionTypeFields({ value, onChange }: QuestionTypeFieldsProps)
         <div>
           <div className="mb-2 flex items-center gap-3">
             <p className="text-sm font-medium text-slate-700">
-              Kotak isian: {value.column_answer}
+              Blanks: {value.column_answer}
             </p>
             <button
               type="button"
-              aria-label="Tambah kotak isian"
+              aria-label="Add a blank"
               onClick={() => setBlankCount((value.column_answer ?? 1) + 1)}
-              className="rounded border border-slate-300 p-1"
+              className="h-10 rounded-[4px] border border-slate-300 bg-white px-2 text-[14px]"
             >
               <Plus size={14} />
             </button>
             <button
               type="button"
-              aria-label="Kurangi kotak isian"
+              aria-label="Remove a blank"
               onClick={() => setBlankCount((value.column_answer ?? 1) - 1)}
-              className="rounded border border-slate-300 p-1"
+              className="h-10 rounded-[4px] border border-slate-300 bg-white px-2 text-[14px]"
             >
               <Minus size={14} />
             </button>
@@ -273,7 +273,7 @@ export function QuestionTypeFields({ value, onChange }: QuestionTypeFieldsProps)
       {value.question_type === "MAP_LABELING" && (
         <div>
           <label htmlFor="map-image" className="mb-1 block text-sm font-medium text-slate-700">
-            URL gambar denah
+            Map image URL
           </label>
           <input
             id="map-image"
@@ -285,7 +285,7 @@ export function QuestionTypeFields({ value, onChange }: QuestionTypeFieldsProps)
                   : [],
               })
             }
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="h-10 w-full rounded-[4px] border border-slate-300 bg-white px-3 text-[14px] hover:border-slate-800 focus:border-primary-500 focus:outline-none"
           />
         </div>
       )}

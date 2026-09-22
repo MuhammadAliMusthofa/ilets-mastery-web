@@ -1,71 +1,56 @@
 "use client";
 
 import React from "react";
+import { QuestionText } from "./QuestionNumber";
+import { QuestionNumber } from "./QuestionNumber";
 import { cn } from "@/src/libs/utils";
 
 interface IMapLabelItem {
-  number: number; // Nomor soal di peta (misal: 11, 12, 13)
+  number: number;
   value: string;
 }
 
 interface IMapLabelingProps {
   questionText: string;
-  mapImageUrl: string; // Wajib ada gambar peta/diagram
-  labels: IMapLabelItem[]; // Array state jawaban dari container
+  mapImageUrl: string;
+  labels: IMapLabelItem[];
   onChange: (number: number, value: string) => void;
 }
 
-export function MapLabeling({
-  questionText,
-  mapImageUrl,
-  labels,
-  onChange,
-}: IMapLabelingProps) {
+export function MapLabeling({ questionText, mapImageUrl, labels, onChange }: IMapLabelingProps) {
   return (
-    <div className="space-y-8">
-      
-      {/* 1. INSTRUKSI */}
-      <div className="font-semibold text-slate-800 text-base leading-relaxed">
-        <div 
-          className="prose prose-slate max-w-none text-slate-700"
-          dangerouslySetInnerHTML={{ __html: questionText }} 
-        />
-      </div>
+    <div className="space-y-5">
+      <QuestionText html={questionText} className="[&>p:first-child]:mt-0" />
 
-      {/* 2. GAMBAR PETA/DIAGRAM */}
-      <div className="flex justify-center bg-slate-100 p-2 sm:p-4 rounded-2xl border border-slate-200">
-        <img 
-          src={mapImageUrl} 
-          alt="Map or Diagram Labeling" 
-          className="max-h-[400px] w-auto rounded-xl shadow-sm object-contain bg-white" 
-        />
-      </div>
+      {mapImageUrl && (
+        <div className="flex justify-center rounded-lg border border-slate-200 bg-white p-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={mapImageUrl} alt="Map for the labelling questions" className="max-h-[420px] w-auto object-contain" />
+        </div>
+      )}
 
-      {/* 3. INPUT GRID (Isian Label) */}
-      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-        <h4 className="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wider">
-          Fill in the labels:
-        </h4>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {labels.map((label) => (
-            <div key={label.number} className="flex items-center gap-3 bg-white p-2 pl-4 rounded-xl border border-slate-200 shadow-sm focus-within:border-brand-purple focus-within:ring-2 focus-within:ring-brand-purple/20 transition-all">
-              <span className="font-black text-brand-purple text-lg min-w-[24px]">
-                {label.number}.
-              </span>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {labels.map((label) => {
+          const inputId = `map-label-${label.number}`;
+          const filled = !!label.value?.trim();
+          return (
+            <div key={label.number} className="flex items-center gap-2.5">
+              <label htmlFor={inputId}>
+                <QuestionNumber value={label.number} className={cn(!filled && "bg-slate-500")} />
+                <span className="sr-only">Label for question {label.number}</span>
+              </label>
               <input
+                id={inputId}
                 type="text"
                 autoComplete="off"
-                placeholder="Type answer..."
                 value={label.value || ""}
-                onChange={(e) => onChange(label.number, e.target.value)}
-                className="w-full bg-transparent border-none outline-none text-slate-800 font-medium placeholder:text-slate-300 placeholder:font-normal"
+                onChange={(event) => onChange(label.number, event.target.value)}
+                className="h-10 w-full rounded-[4px] border border-slate-300 bg-white px-3 text-[15px] text-slate-800 transition-colors duration-150 hover:border-slate-800 focus:border-primary-500 focus:outline-none"
               />
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
-
     </div>
   );
 }

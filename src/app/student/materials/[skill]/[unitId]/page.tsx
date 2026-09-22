@@ -1,4 +1,3 @@
-import { WrapperDotBackground } from "@/src/_global/components/Background/WrapperDotBackground";
 import UnitDetailContainer from "@/src/features/student-dashboard/containers/UnitDetailContainer";
 import { notFound } from "next/navigation";
 
@@ -17,8 +16,6 @@ export default async function UnitPage({
   }
 
   return (
-    <WrapperDotBackground>
-      <UnitDetailContainer skill={currentSkill} unitId={unitId} />
-    </WrapperDotBackground>
+    <UnitDetailContainer skill={currentSkill} unitId={unitId} />
   );
 }

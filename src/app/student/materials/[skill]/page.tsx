@@ -1,4 +1,3 @@
-import { WrapperDotBackground } from "@/src/_global/components/Background/WrapperDotBackground";
 import SkillDetailContainer from "@/src/features/student-materials/containers/SkillDetailContainer";
 import { notFound } from "next/navigation";
 
@@ -18,9 +17,7 @@ export default async function SkillPage({ params }: { params: Promise<{ skill: s
   }
 
   return (
-    <WrapperDotBackground>
-      <SkillDetailContainer skill={currentSkill} />
-    </WrapperDotBackground>
+    <SkillDetailContainer skill={currentSkill} />
   )
 
 }
