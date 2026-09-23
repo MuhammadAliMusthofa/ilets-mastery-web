@@ -8,7 +8,7 @@ import { ieltsAdminService } from '../services/ielts-admin.service';
 
 vi.mock('../services/ielts-admin.service', () => ({
   ieltsAdminService: {
-    questions: { list: vi.fn(), create: vi.fn(), remove: vi.fn() },
+    questions: { list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn() },
     passages: { list: vi.fn() },
   },
 }));
@@ -51,18 +51,17 @@ describe('QuestionAdminContainer', () => {
     renderWithQuery(<QuestionAdminContainer />);
 
     expect(await screen.findByText('When does the library open?')).toBeInTheDocument();
-    expect(screen.getByText('Multiple choice')).toBeInTheDocument();
+    // Label tipe muncul di baris tabel dan di daftar filter.
+    expect(screen.getAllByText('Multiple choice').length).toBeGreaterThan(0);
   });
 
   it('menyaring berdasarkan skill', async () => {
     renderWithQuery(<QuestionAdminContainer />);
     await screen.findByText('When does the library open?');
 
-    await userEvent.selectOptions(screen.getByLabelText(/Filter by skill/i), 'WRITING');
+    await userEvent.click(screen.getByRole('radio', { name: /Writing/i }));
 
-    expect(ieltsAdminService.questions.list).toHaveBeenCalledWith(
-      expect.objectContaining({ skill: 'WRITING' })
-    );
+    expect(screen.queryByText('When does the library open?')).not.toBeInTheDocument();
   });
 
   it('mengganti field form saat tipe soal diubah', async () => {
@@ -87,7 +86,7 @@ describe('QuestionAdminContainer', () => {
     await userEvent.type(screen.getByLabelText('Option A text'), 'Jam 8');
     await userEvent.type(screen.getByLabelText('Option B text'), 'Jam 9');
     await userEvent.click(screen.getByLabelText('Mark B as correct'));
-    await userEvent.click(screen.getByRole('button', { name: /^Save$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Save question/i }));
 
     expect(ieltsAdminService.questions.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -112,7 +111,7 @@ describe('QuestionAdminContainer', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /New question/i }));
     await userEvent.type(screen.getByLabelText(/^Question text/i), 'Soal');
-    await userEvent.click(screen.getByRole('button', { name: /^Save$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Save question/i }));
 
     expect(
       await screen.findByText(/Jawaban "Z" tidak ada di daftar options/i)

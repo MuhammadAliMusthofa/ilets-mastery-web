@@ -18,5 +18,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    // Uji formulir mengetik karakter per karakter lewat userEvent; saat seluruh
+    // berkas uji jalan paralel, 5 detik bawaan kadang tidak cukup.
+    testTimeout: 20000,
   },
 });

@@ -189,15 +189,20 @@ export function CheckpointContainer({ levelKey, taskId }: { levelKey: LevelKey; 
   const [wrong, setWrong] = useState<Set<number>>(new Set());
   const [attempt, setAttempt] = useState(0);
 
-  // Satu soal dari setiap lesson di level ini: 12 soal yang mencakup seluruh level.
+  // Satu soal dari setiap lesson di level ini. Indeks digeser per lesson supaya satu
+  // checkpoint berisi campuran pilihan ganda, ketik, susun kalimat, dan kelompokkan;
+  // "Try again" menggeser lagi sehingga soalnya berganti.
   const pool = useMemo(
     () =>
-      (level?.units ?? []).flatMap((unit) =>
-        unit.lessons.map((lesson) => ({
-          question: { ...lesson.content.check[attempt % lesson.content.check.length], source: lesson.title },
+      (level?.units ?? [])
+        .flatMap((unit) => unit.lessons)
+        .map((lesson, lessonIndex) => ({
+          question: {
+            ...lesson.content.check[(attempt + lessonIndex) % lesson.content.check.length],
+            source: lesson.title,
+          },
           lessonId: lesson.id,
-        }))
-      ),
+        })),
     [level, attempt]
   );
 

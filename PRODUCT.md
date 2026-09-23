@@ -11,7 +11,7 @@ web
 - **Primary — pelajar mandiri berbahasa Indonesia** yang belajar sendiri tanpa kelas atau tutor. Platform ini adalah satu-satunya pembimbing mereka, jadi setiap langkah harus menjelaskan dirinya sendiri: apa yang harus dikerjakan, kenapa, dan seberapa jauh lagi.
   - Mereka yang menyiapkan **IELTS General Training** — umumnya untuk migrasi, kerja, atau pelatihan di luar negeri — dengan tanggal tes dan target band yang nyata.
   - Mereka yang fondasi bahasa Inggrisnya belum kuat dan butuh jalur **Beginner → Advanced** sebelum menyentuh materi IELTS.
-- **Secondary — admin konten** yang menyusun passage, bank soal, dan paket ujian. Pekerjaannya teliti dan berulang; kesalahan konten langsung merugikan nilai siswa.
+- **Secondary — admin konten** yang menyusun passage, bank soal, dan paket ujian, serta mengelola kurikulum Basic English (unit, lesson, soal quick check) dan kutipan motivasi harian. Pekerjaannya teliti dan berulang; kesalahan konten langsung merugikan nilai siswa.
 
 ## Product Purpose
 
@@ -28,14 +28,16 @@ IELTS Vibe membawa pelajar dari fondasi bahasa Inggris sampai target band IELTS 
 - Dipakai **mayoritas di laptop / PC**. Mock test dikerjakan dalam satu duduk panjang (hingga 165 menit untuk full test), layar penuh, dengan timer berjalan dan audio Listening.
 - Seluruh antarmuka dalam **bahasa Inggris** (keputusan pengguna, 22 Sep 2026: ini situs belajar bahasa Inggris, jadi UI ikut menjadi paparan bahasa). Konten soal IELTS juga bahasa Inggris.
 - Alur siswa: dashboard → pilih module → daftar mock test → detail → ujian (autosave, timer server) → review sebelum kumpul → hasil & pembahasan.
-- Alur admin: passage → bank soal (6 tipe) → rakit paket per section → terbitkan (ditolak bila struktur tidak sesuai format GT).
+- Alur admin IELTS: passage → bank soal (6 tipe) → rakit paket per section → terbitkan (ditolak bila struktur tidak sesuai format GT).
+- Alur admin Basic: kurikulum per level → unit → lesson, dengan editor isi lesson + empat tipe soal quick check dan pratinjau kuisnya.
 
 ## Capabilities and Constraints
 
 - Tipe soal: Multiple Choice, Multiple Choice Complex, True/False/Not Given, Isian Singkat, Esai (Writing/Speaking), Pelabelan Denah. Enam tipe GT lain (Matching Headings, dll.) belum ada.
 - Satuan penilaian adalah **mark**, bukan baris soal: Listening & Reading masing-masing 40 mark.
 - Writing & Speaking belum dinilai (self-assessment direncanakan di Fase 1D); Speaking belum bisa merekam suara.
-- Basic to Hero punya kurikulum 52 lesson (4 level; Beginner dibuka unit Parts of speech) dan learning path (Guided tanpa jadwal atau Scheduled 1–3 bulan) di `/basic`. Tes penempatan, rebalance mingguan otomatis, dan quotes motivasi **belum dibangun**.
+- Basic to Hero punya kurikulum 52 lesson (4 level; Beginner dibuka unit Parts of speech) dan learning path (Guided tanpa jadwal atau Scheduled 1–3 bulan) di `/basic`. Quick check tiap lesson memakai empat tipe soal: pilihan ganda, ketik jawaban, susun kalimat, dan kelompokkan kata (drag & drop). Tes penempatan dan rebalance mingguan otomatis **belum dibangun**.
+- Quote of the day di dashboard siswa: dikelola admin di `/admin/quotes`, bergilir satu kutipan aktif per hari; kartunya tidak tampil bila tidak ada kutipan aktif.
 - Stack: Next.js 16 App Router, Tailwind 4, shadcn/radix; backend Express + Prisma + MariaDB.
 
 ## Brand Commitments

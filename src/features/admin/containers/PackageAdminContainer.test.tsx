@@ -75,7 +75,7 @@ describe('PackageAdminContainer', () => {
     renderWithQuery(<PackageAdminContainer />);
 
     expect(await screen.findByText('GT Tryout 1')).toBeInTheDocument();
-    expect(screen.getByText(/Draft/i)).toBeInTheDocument();
+    expect(screen.getByText('Draft')).toBeInTheDocument();
   });
 
   it('membuka penyusun isi saat satu paket dipilih', async () => {

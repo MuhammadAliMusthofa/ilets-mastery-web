@@ -12,8 +12,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-import { registerSchema } from "../validator/validation";
+import { PASSWORD_RULES, registerSchema } from "../validator/validation";
 import { authService } from "../services/auth.service";
+import { Check } from "lucide-react";
+import { cn } from "@/src/libs/utils";
+
+/**
+ * Checklist syarat password yang ikut berubah saat diketik, supaya aturannya
+ * terbaca sebelum tombol ditekan — bukan muncul sebagai error setelah gagal.
+ */
+function PasswordRules({ value }: { value: string }) {
+    return (
+        <ul className="mt-2 grid gap-1 sm:grid-cols-2" aria-label="Password requirements">
+            {PASSWORD_RULES.map((rule) => {
+                const met = rule.test(value ?? "");
+                return (
+                    <li key={rule.label} className={cn("flex items-center gap-1.5 text-[13px]", met ? "text-[#007a47]" : "text-slate-500")}>
+                        <span
+                            aria-hidden="true"
+                            className={cn(
+                                "flex size-4 shrink-0 items-center justify-center rounded-full border",
+                                met ? "border-[#00c875] bg-[#00c875] text-white" : "border-slate-300"
+                            )}
+                        >
+                            {met && <Check size={10} strokeWidth={3} />}
+                        </span>
+                        {rule.label}
+                        <span className="sr-only">{met ? " — met" : " — not met yet"}</span>
+                    </li>
+                );
+            })}
+        </ul>
+    );
+}
 
 export default function RegisterContainer() {
     const router = useRouter();
@@ -42,9 +73,11 @@ export default function RegisterContainer() {
             
             // Redirect ke halaman verifikasi akun
             router.push(`/verify?email=${encodeURIComponent(registerData.email)}&registered=true`);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Register Error:", error);
-            setErrorMsg(error.response?.data?.message || "Couldn't create your account. Please try again.");
+            // Pesan backend ditampilkan apa adanya: validatornya menyebut persis aturan yang dilanggar.
+            const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+            setErrorMsg(message || "Couldn't create your account. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -97,6 +130,7 @@ export default function RegisterContainer() {
                                 <FormControl>
                                     <Input type="password" placeholder="••••••••" className="h-12 rounded-xl px-4 text-[15px]" {...field} />
                                 </FormControl>
+                                <PasswordRules value={field.value} />
                                 <FormMessage />
                             </FormItem>
                         )}

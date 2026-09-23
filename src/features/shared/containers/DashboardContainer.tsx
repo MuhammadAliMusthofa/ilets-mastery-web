@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { gsap, useGSAP, useScrollReveal, prefersReducedMotion } from "@/src/_global/motion/gsap";
+import { gsap, useGSAP, prefersReducedMotion } from "@/src/_global/motion/gsap";
+import { Reveal } from "@/src/_global/motion/Reveal";
 import Link from "next/link";
 import { ArrowRight, Loader2, Play } from "lucide-react";
 import { useAuthStore } from "@/src/store/authStore";
@@ -16,6 +17,10 @@ import { ModuleHubContainer } from "./ModuleHubContainer";
 import { SkillCards } from "../components/SkillCards";
 import { ProgressSection } from "../components/ProgressSection";
 import { BasicTodayCard } from "@/src/features/basic/components/BasicTodayCard";
+import { QuoteOfDayCard } from "../components/QuoteOfDayCard";
+
+/** Kartu di dalam grid: anak langsung dari pembungkus grid tiap section. */
+const CARDS_IN_GRID = ":scope > div > *";
 
 const greetingFor = (hour: number) => {
   if (hour < 11) return "Good morning";
@@ -65,18 +70,43 @@ export function DashboardContainer() {
   const featured = (packages ?? []).slice(0, 2);
 
   const rootRef = useRef<HTMLDivElement>(null);
-  useScrollReveal(rootRef, [Boolean(packages)]);
+
   useGSAP(
     () => {
       if (prefersReducedMotion()) return;
-      // Intro sekali saat mount; hanya gerak, tanpa opacity, agar hero tidak pernah
-      // tertinggal pudar bila data datang di tengah animasi.
+      // Intro sekali saat mount. Hero dan isinya hanya bergerak, tanpa opacity,
+      // agar tidak pernah tertinggal pudar bila data datang di tengah animasi.
       gsap
         .timeline({ defaults: { ease: "power3.out" } })
         .from(".dash-hero", { y: 24, duration: 0.8 })
-        .from(".dash-figure", { yPercent: 18, duration: 1 }, "-=0.6");
+        .from(".dash-hero-line", { y: 18, duration: 0.7, stagger: 0.08 }, "-=0.55")
+        .from(".dash-figure", { yPercent: 18, duration: 1 }, "-=0.75");
     },
     { scope: rootRef }
+  );
+
+  // Kartu melayang baru ada setelah daftar tes dimuat; munculkan dengan lembut
+  // dan hanya sekali, bukan berkedip tiap kali data disegarkan.
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return;
+      const cards = gsap.utils
+        .toArray<HTMLElement>(".dash-float")
+        .filter((card) => !card.dataset.shown);
+      if (cards.length === 0) return;
+      cards.forEach((card) => {
+        card.dataset.shown = "1";
+      });
+      gsap.from(cards, {
+        y: 14,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power3.out",
+        stagger: 0.12,
+        clearProps: "opacity,transform",
+      });
+    },
+    { scope: rootRef, dependencies: [Boolean(result), Boolean(next)] }
   );
 
   return (
@@ -86,19 +116,19 @@ export function DashboardContainer() {
         <section className="dash-hero relative overflow-hidden rounded-4xl bg-slate-950 text-white">
           <div className="grid lg:grid-cols-[1.05fr_1fr]">
             <div className="relative z-10 flex flex-col justify-center px-7 py-12 sm:px-12 lg:py-16 lg:pl-14">
-              <p className="text-[15px] text-[#c3c6d4]">
+              <p className="dash-hero-line text-[15px] text-[#c3c6d4]">
                 {now?.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) ?? " "}
               </p>
-              <h1 className="mt-3 font-display text-[40px] font-normal leading-[1.05] tracking-[-0.02em] sm:text-[56px]">
+              <h1 className="dash-hero-line mt-3 font-display text-[40px] font-normal leading-[1.05] tracking-[-0.02em] sm:text-[56px]">
                 {now ? greetingFor(now.getHours()) : "Hello"}
                 {firstName ? `, ${firstName}` : ""}
               </h1>
-              <p className="mt-5 max-w-[42ch] text-[17px] leading-relaxed text-[#c3c6d4]">
+              <p className="dash-hero-line mt-5 max-w-[42ch] text-[17px] leading-relaxed text-[#c3c6d4]">
                 {running
                   ? `${running.title} is still running. The clock keeps ticking, so pick it up while you can.`
                   : "One mock test today beats ten strategy videos. The crew is ready to guide every skill."}
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="dash-hero-line mt-8 flex flex-wrap gap-3">
                 <Link
                   href={primary.href}
                   className="group/cta inline-flex h-12 items-center gap-2 rounded-full bg-[#b9e3ff] px-7 text-[15px] font-medium text-slate-900 transition-colors hover:bg-white"
@@ -155,45 +185,63 @@ export function DashboardContainer() {
       <div className="mx-auto max-w-[1240px] space-y-20 px-5 pt-16 lg:px-8">
         <BasicTodayCard />
 
+        <QuoteOfDayCard />
+
         {packages && (
-          <div data-reveal>
+          <Reveal>
             <ProgressSection packages={packages} />
-          </div>
+          </Reveal>
         )}
 
-        <section data-reveal aria-labelledby="modules">
-          <SectionTitle
-            id="modules"
-            title="Two tracks, one goal"
-            description="Build your foundations in Basic to Hero, or go straight to IELTS General Training prep. You can run both at once."
-          />
-          <ModuleHubContainer />
+        <section aria-labelledby="modules">
+          <Reveal>
+            <SectionTitle
+              id="modules"
+              title="Two tracks, one goal"
+              description="Build your foundations in Basic to Hero, or go straight to IELTS General Training prep. You can run both at once."
+            />
+          </Reveal>
+          {/* Kartu module baru ada setelah datanya datang, jadi Reveal-nya ikut
+              mount bersama kartunya dan memunculkannya satu per satu. */}
+          <Reveal select={CARDS_IN_GRID}>
+            <ModuleHubContainer />
+          </Reveal>
         </section>
 
-        <section data-reveal aria-labelledby="skills">
-          <SectionTitle
-            id="skills"
-            title="A crew for every skill"
-            description="Each skill has its own guide, complete with strategies and General Training question formats."
-          />
-          <SkillCards />
+        <section aria-labelledby="skills">
+          <Reveal>
+            <SectionTitle
+              id="skills"
+              title="A crew for every skill"
+              description="Each skill has its own guide, complete with strategies and General Training question formats."
+            />
+          </Reveal>
+          <Reveal select={CARDS_IN_GRID}>
+            <SkillCards />
+          </Reveal>
         </section>
 
-        <section data-reveal aria-labelledby="mock">
-          <SectionTitle
-            id="mock"
-            title="Featured mock tests"
-            action={<ArrowLink href={MOCK_ROUTES.list}>All mock tests</ArrowLink>}
-          />
+        <section aria-labelledby="mock">
+          <Reveal>
+            <SectionTitle
+              id="mock"
+              title="Featured mock tests"
+              action={<ArrowLink href={MOCK_ROUTES.list}>All mock tests</ArrowLink>}
+            />
+          </Reveal>
           {isLoading && (
             <p className="flex items-center gap-2 text-[15px] text-slate-500">
               <Loader2 size={16} className="animate-spin" /> Loading tests…
             </p>
           )}
           {isError && (
-            <p className="text-[15px] text-[#b12a41]">Couldn't load the tests. Reload the page to try again.</p>
+            <p className="text-[15px] text-[#b12a41]">Couldn’t load the tests. Reload the page to try again.</p>
           )}
-          {packages && <MockCardGrid packages={featured} emptyText="No tests have been published yet." />}
+          {packages && (
+            <Reveal select={CARDS_IN_GRID}>
+              <MockCardGrid packages={featured} emptyText="No tests have been published yet." />
+            </Reveal>
+          )}
         </section>
       </div>
     </div>

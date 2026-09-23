@@ -28,12 +28,19 @@ export const DURATION_OPTIONS = [
 
 export const MIN_STUDY_DAYS = 3;
 
+/** Soal cek cepat: pilihan ganda, ketik jawaban, susun kalimat, atau kelompokkan kata. */
+export type CheckQuestion =
+  | { type: "choice"; question: string; options: string[]; answer: number; why: string }
+  | { type: "type"; question: string; answers: string[]; why: string }
+  | { type: "order"; question: string; words: string[]; why: string }
+  | { type: "sort"; question: string; buckets: string[]; items: Array<{ text: string; bucket: number }>; why: string };
+
 export interface LessonContent {
   goal: string;
   explanation: string[];
   examples: Array<{ en: string; note?: string }>;
   tip: string | null;
-  check: Array<{ question: string; options: string[]; answer: number; why: string }>;
+  check: CheckQuestion[];
 }
 
 export interface CurriculumLesson {

@@ -22,8 +22,9 @@ import {
   type PlanTask,
 } from "@/src/models/basic";
 import { useArchivePlan, useBasicPlan, useCurriculum, useReschedulePlan } from "../hooks/useBasic";
-import { LEVEL_STYLE, PILLAR_STYLE } from "../constants";
+import { LEVEL_STYLE } from "../constants";
 import { PathMap } from "../components/PathMap";
+import { UnitFlow } from "../components/UnitFlow";
 
 // ---------------------------------------------------------------------------
 // Belum punya path
@@ -86,18 +87,18 @@ function NoPlanIntro() {
               <article key={level.key} className="rounded-4xl p-6" style={{ backgroundColor: LEVEL_STYLE[level.key].tint }}>
                 <p className="tabular text-[14px] text-slate-600">Level 0{index + 1}</p>
                 <h3 className="font-display text-[24px] font-normal text-slate-900">{level.name}</h3>
-                <ul className="mt-4 space-y-2">
-                  {level.units.map((unit) => {
-                    const Icon = PILLAR_STYLE[unit.pillar].icon;
-                    return (
-                      <li key={unit.id} className="flex items-center gap-3 rounded-2xl bg-white px-3 py-2.5 text-[14px] text-slate-800">
-                        <Icon size={16} style={{ color: PILLAR_STYLE[unit.pillar].accent }} aria-hidden="true" />
-                        <span className="min-w-0 flex-1 truncate">{unit.title}</span>
-                        <span className="tabular text-[12px] text-slate-500">{unit.lessons.length}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <div className="mt-4">
+                  <UnitFlow
+                    levelName={level.name}
+                    accent={LEVEL_STYLE[level.key].accent}
+                    units={level.units.map((unit) => ({
+                      id: unit.id,
+                      title: unit.title,
+                      pillar: unit.pillar,
+                      lessons: unit.lessons.length,
+                    }))}
+                  />
+                </div>
               </article>
             ))}
           </div>

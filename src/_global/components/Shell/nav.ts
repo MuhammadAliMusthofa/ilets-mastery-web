@@ -16,6 +16,7 @@ import {
   FolderArchive,
   Library,
   Users,
+  Quote,
   type LucideIcon,
 } from "lucide-react";
 
@@ -78,9 +79,13 @@ export const ADMIN_NAV: NavSection[] = [
     ],
   },
   {
+    workspace: { name: "English Basic to Hero", letter: "B", color: "#00c875", ink: "#323338" },
+    items: [{ label: "Curriculum", href: "/admin/basic", icon: Library }],
+  },
+  {
     title: "More",
     items: [
-      { label: "Study materials", href: "/admin/materials", icon: Library },
+      { label: "Quotes", href: "/admin/quotes", icon: Quote },
       { label: "Users", href: "/admin/users", icon: Users },
     ],
   },

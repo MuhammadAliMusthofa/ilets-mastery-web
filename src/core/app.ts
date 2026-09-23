@@ -30,6 +30,21 @@ export const API_ENDPOINTS = {
     package: (id: number) => `/admin/packages/${id}`,
     packageSections: (id: number) => `/admin/packages/${id}/sections`,
     packagePublish: (id: number) => `/admin/packages/${id}/publish`,
+    quotes: "/admin/quotes",
+    quote: (id: number) => `/admin/quotes/${id}`,
+    basic: {
+      curriculum: "/admin/basic/curriculum",
+      level: (key: string) => `/admin/basic/levels/${key}`,
+      units: "/admin/basic/units",
+      unit: (id: number) => `/admin/basic/units/${id}`,
+      moveUnit: (id: number) => `/admin/basic/units/${id}/move`,
+      lessons: "/admin/basic/lessons",
+      lesson: (id: number) => `/admin/basic/lessons/${id}`,
+      moveLesson: (id: number) => `/admin/basic/lessons/${id}/move`,
+    },
+  },
+  quotes: {
+    today: "/quotes/today",
   },
   exam: {
     packages: "/ielts/packages",

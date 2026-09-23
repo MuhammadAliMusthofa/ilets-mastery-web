@@ -11,8 +11,10 @@ vi.mock('../services/ielts-admin.service', () => ({
     passages: {
       list: vi.fn(),
       create: vi.fn(),
+      update: vi.fn(),
       remove: vi.fn(),
     },
+    questions: { list: vi.fn() },
   },
 }));
 
@@ -41,6 +43,7 @@ describe('PassageAdminContainer', () => {
     vi.clearAllMocks();
     vi.mocked(ieltsAdminService.passages.list).mockResolvedValue([passage]);
     vi.mocked(ieltsAdminService.passages.create).mockResolvedValue(passage);
+    vi.mocked(ieltsAdminService.questions.list).mockResolvedValue([]);
   });
 
   it('menampilkan passage yang sudah ada', async () => {
@@ -59,9 +62,11 @@ describe('PassageAdminContainer', () => {
     renderWithQuery(<PassageAdminContainer />);
     await screen.findByText('Community Notice Board');
 
-    await userEvent.selectOptions(screen.getByLabelText(/Filter by skill/i), 'LISTENING');
+    await userEvent.click(screen.getByRole('radio', { name: /Listening/i }));
+    expect(screen.queryByText('Community Notice Board')).not.toBeInTheDocument();
 
-    expect(ieltsAdminService.passages.list).toHaveBeenCalledWith({ skill: 'LISTENING' });
+    await userEvent.click(screen.getByRole('radio', { name: /Reading/i }));
+    expect(screen.getByText('Community Notice Board')).toBeInTheDocument();
   });
 
   it('mengirim passage baru lewat form', async () => {
@@ -71,7 +76,7 @@ describe('PassageAdminContainer', () => {
     await userEvent.click(screen.getByRole('button', { name: /New passage/i }));
     await userEvent.type(screen.getByLabelText(/^Title/i), 'Job Description');
     await userEvent.type(screen.getByLabelText(/^Content/i), '<p>Duties</p>');
-    await userEvent.click(screen.getByRole('button', { name: /^Save$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Save passage/i }));
 
     expect(ieltsAdminService.passages.create).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Job Description', content: '<p>Duties</p>' })

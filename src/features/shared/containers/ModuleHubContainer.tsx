@@ -54,7 +54,7 @@ export function ModuleHubContainer() {
   }
 
   if (isError || !modules) {
-    return <p className="text-[15px] text-[#b12a41]">Couldn't load the modules. Reload the page to try again.</p>;
+    return <p className="text-[15px] text-[#b12a41]">Couldn’t load the modules. Reload the page to try again.</p>;
   }
 
   return (
