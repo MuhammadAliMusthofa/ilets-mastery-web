@@ -28,3 +28,9 @@ export const WEEKDAYS = [
 
 /** Nilai lulus checkpoint level. */
 export const CHECKPOINT_PASS = 0.7;
+
+/** Nilai lulus quick check sebelum lesson atau review boleh ditandai selesai. */
+export const QUICK_CHECK_PASS = 0.7;
+
+/** Jawaban benar minimal untuk lulus, dibulatkan ke atas. */
+export const passMarkOf = (total: number) => (total === 0 ? 0 : Math.max(1, Math.ceil(total * QUICK_CHECK_PASS)));

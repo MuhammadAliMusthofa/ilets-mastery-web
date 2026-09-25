@@ -11,6 +11,7 @@ import { GaugeChart } from "@/src/_global/components/Charts/Charts";
 import { PILLAR_LABELS, type LevelKey, type UnitDetail } from "@/src/models/basic";
 import { useBasicPlan, useCompleteTask, useLevel, useUnit } from "../hooks/useBasic";
 import { CHECKPOINT_PASS, LEVEL_STYLE, PILLAR_STYLE } from "../constants";
+import { useQuickCheckGate } from "../hooks/useQuickCheckGate";
 import { QuickCheck, type CheckQuestion } from "../components/QuickCheck";
 
 function BackLink() {
@@ -81,12 +82,13 @@ export function UnitReviewContainer({ unitId, taskId }: { unitId: number; taskId
   const { data: unit, isLoading, isError } = useUnit(unitId);
   const task = usePlanTask(taskId, (item) => item.task_type === "UNIT_REVIEW" && item.unit_id === unitId);
   const completeTask = useCompleteTask();
-  const [score, setScore] = useState<{ correct: number; answered: number; total: number } | null>(null);
 
   const questions: CheckQuestion[] = useMemo(
     () => (unit?.lessons ?? []).flatMap((lesson) => lesson.content.check.map((q) => ({ ...q, source: lesson.title }))),
     [unit]
   );
+  // Review hanya bisa diselesaikan setelah nilai minimalnya tercapai.
+  const gate = useQuickCheckGate(questions.length);
 
   if (isLoading) return <Loading text="Loading review…" />;
   if (isError || !unit) {
@@ -98,7 +100,6 @@ export function UnitReviewContainer({ unitId, taskId }: { unitId: number; taskId
   }
 
   const style = PILLAR_STYLE[unit.pillar];
-  const allAnswered = score !== null && score.answered === score.total;
   const done = task?.status === "DONE";
 
   return (
@@ -130,40 +131,55 @@ export function UnitReviewContainer({ unitId, taskId }: { unitId: number; taskId
         </section>
 
         <section aria-labelledby="practice" className="mx-auto max-w-[780px]">
-          <div className="mb-4 flex items-end justify-between gap-3">
-            <h2 id="practice" className="font-display text-[24px] font-normal text-slate-900">
-              Practice
-            </h2>
-            {score && (
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 id="practice" className="font-display text-[24px] font-normal text-slate-900">
+                Practice
+              </h2>
+              <p className="mt-1 text-[14px] text-slate-600">
+                Get <span className="tabular font-medium text-slate-900">{gate.needed}</span> of{" "}
+                <span className="tabular">{questions.length}</span> right ({gate.percent}%) to finish this review.
+              </p>
+            </div>
+            {gate.score && (
               <span className="tabular text-[14px] text-slate-600">
-                {score.correct} of {score.total} correct
+                {gate.score.correct} of {questions.length} correct
               </span>
             )}
           </div>
-          <QuickCheck questions={questions} onScore={(correct, answered, total) => setScore({ correct, answered, total })} />
+          <QuickCheck key={gate.attempt} questions={questions} onScore={gate.onScore} />
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-4xl bg-slate-50 p-6">
-            <p className="max-w-[44ch] text-[15px] text-slate-700">
+            <p className="max-w-[46ch] text-[15px] text-slate-700">
               {done
                 ? "This review is done."
-                : allAnswered
-                  ? "All answered. Finish the review to continue your path."
-                  : `Answer all ${questions.length} questions to finish the review.`}
+                : gate.passed
+                  ? "You passed. Finish the review to continue your path."
+                  : gate.failed
+                    ? `You got ${gate.score?.correct} of ${questions.length}. Look at the key points again, then try once more — ${gate.needed} correct finishes this review.`
+                    : `Answer every question. ${gate.needed} of ${questions.length} correct finishes this review.`}
             </p>
             {task && !done ? (
-              <Button
-                variant="dark"
-                shape="pill"
-                size="lg"
-                disabled={!allAnswered || completeTask.isPending}
-                onClick={async () => {
-                  await completeTask.mutateAsync(task.id);
-                  router.push("/basic");
-                }}
-              >
-                {completeTask.isPending && <Loader2 size={16} className="animate-spin" />}
-                Finish review <ArrowRight size={16} />
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                {gate.failed && (
+                  <Button variant="outline" shape="pill" size="lg" onClick={gate.retry}>
+                    <RotateCcw size={16} /> Try again
+                  </Button>
+                )}
+                <Button
+                  variant="dark"
+                  shape="pill"
+                  size="lg"
+                  disabled={!gate.passed || completeTask.isPending}
+                  onClick={async () => {
+                    await completeTask.mutateAsync(task.id);
+                    router.push("/basic");
+                  }}
+                >
+                  {completeTask.isPending && <Loader2 size={16} className="animate-spin" />}
+                  Finish review <ArrowRight size={16} />
+                </Button>
+              </div>
             ) : (
               <Button variant="dark" shape="pill" size="lg" onClick={() => router.push("/basic")}>
                 Back to your path <ArrowRight size={16} />

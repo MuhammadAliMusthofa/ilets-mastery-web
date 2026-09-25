@@ -18,6 +18,7 @@ import { SKILL_COLOR, SKILL_TINT, STATUS_COLOR } from "@/src/_global/design/toke
 import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from "@/src/_global/motion/gsap";
 import { ProgressShowcase } from "./ProgressShowcase";
 import { SkillShowcase } from "./SkillShowcase";
+import { ScreenSpiral } from "./ScreenSpiral";
 import { CrewArc } from "./CrewArc";
 import { PromptWheel } from "./PromptWheel";
 import { QuestionRail } from "./QuestionRail";
@@ -276,6 +277,8 @@ export function LandingPage() {
           </Canvas>
         </section>
 
+        
+
         {/* Showcase kategori: warna, objek 3D, dan karakter berganti; scroll membuatnya menghilang */}
         <div className="pt-24">
           <SkillShowcase />
@@ -308,6 +311,9 @@ export function LandingPage() {
         <section className="mt-24" aria-label="Question types">
           <QuestionRail />
         </section>
+
+        {/* Layar asli aplikasi, tersusun sebagai spiral yang berputar mengikuti scroll */}
+        <ScreenSpiral />
 
         {/* Alur, kartu bertumpuk */}
         <section id="alur" className="scroll-mt-20 pt-24" aria-label="How it works">

@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, ChevronLeft, Clock3, Lightbulb, Loader2, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, Clock3, Lightbulb, Loader2, RotateCcw, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageBody } from "@/src/_global/components/Shell/AppShell";
 import { Canvas, Chip } from "@/src/_global/components/Showcase/Showcase";
@@ -12,13 +11,16 @@ import { PILLAR_LABELS, taskHref } from "@/src/models/basic";
 import { useBasicPlan, useCompleteLesson, useLesson } from "../hooks/useBasic";
 import { PILLAR_STYLE } from "../constants";
 import { QuickCheck } from "../components/QuickCheck";
+import { useQuickCheckGate } from "../hooks/useQuickCheckGate";
 
 export function LessonContainer({ lessonId }: { lessonId: number }) {
   const router = useRouter();
   const { data: lesson, isLoading, isError } = useLesson(lessonId);
   const { data: plan } = useBasicPlan();
   const complete = useCompleteLesson();
-  const [score, setScore] = useState<{ correct: number; answered: number; total: number } | null>(null);
+  // Quick check harus lulus dulu sebelum lesson boleh ditandai selesai.
+  const total = lesson?.content.check.length ?? 0;
+  const gate = useQuickCheckGate(total);
 
   if (isLoading) {
     return (
@@ -154,16 +156,22 @@ export function LessonContainer({ lessonId }: { lessonId: number }) {
 
         <section aria-labelledby="check" className="mt-14">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-            <h2 id="check" className="font-display text-[26px] font-normal text-slate-900">
-              Quick check
-            </h2>
-            {score && (
+            <div>
+              <h2 id="check" className="font-display text-[26px] font-normal text-slate-900">
+                Quick check
+              </h2>
+              <p className="mt-1 text-[14px] text-slate-600">
+                Get <span className="tabular font-medium text-slate-900">{gate.needed}</span> of{" "}
+                <span className="tabular">{total}</span> right ({gate.percent}%) to complete this lesson.
+              </p>
+            </div>
+            {gate.score && (
               <span className="tabular text-[14px] text-slate-600">
-                {score.correct} of {score.total} correct
+                {gate.score.correct} of {total} correct
               </span>
             )}
           </div>
-          <QuickCheck questions={content.check} onScore={(correct, answered, total) => setScore({ correct, answered, total })} />
+          <QuickCheck key={gate.attempt} questions={content.check} onScore={gate.onScore} />
         </section>
 
         <div className="mt-12 rounded-4xl bg-slate-50 p-6 sm:p-8">
@@ -187,15 +195,30 @@ export function LessonContainer({ lessonId }: { lessonId: number }) {
             </div>
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="max-w-[40ch] text-[15px] text-slate-700">
-                {score && score.answered === score.total
-                  ? "Nice work. Mark the lesson as complete to move along your path."
-                  : "Try the quick check, then mark the lesson as complete."}
+              <p className="max-w-[46ch] text-[15px] text-slate-700">
+                {gate.passed
+                  ? "You passed the quick check. Mark the lesson as complete to move along your path."
+                  : gate.failed
+                    ? `You got ${gate.score?.correct} of ${total}. Read the explanations above, then try the quick check again — ${gate.needed} correct unlocks this lesson.`
+                    : `Answer the quick check first. ${gate.needed} of ${total} correct unlocks this lesson.`}
               </p>
-              <Button variant="dark" shape="pill" size="lg" onClick={handleComplete} disabled={complete.isPending}>
-                {complete.isPending ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={3} />}
-                Mark as complete
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                {gate.failed && (
+                  <Button variant="outline" shape="pill" size="lg" onClick={gate.retry}>
+                    <RotateCcw size={16} /> Try again
+                  </Button>
+                )}
+                <Button
+                  variant="dark"
+                  shape="pill"
+                  size="lg"
+                  onClick={handleComplete}
+                  disabled={!gate.passed || complete.isPending}
+                >
+                  {complete.isPending ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={3} />}
+                  Mark as complete
+                </Button>
+              </div>
             </div>
           )}
           {complete.isError && (
