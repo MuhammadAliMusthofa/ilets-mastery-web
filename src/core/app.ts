@@ -1,19 +1,59 @@
-import { ENV_BACKEND_URL } from "./environment";
-
-export const BASE_URL = `${ENV_BACKEND_URL}/admin`;
-export const BASE_URL_PUBLIC = `${ENV_BACKEND_URL}`;
-
 export const API_ENDPOINTS = {
-  user: `/admin/user`,
-  category: `admin/category`,
-  subcategory: `admin/sub-category`,
-  course: `admin/course`,
-  material: `admin/material-content`,
-  syllabus: `admin/syllabus`,
-  materialType: `${BASE_URL_PUBLIC}/material`,
-  attachment: `admin/upload`,
-  attachments: `admin/uploads`,
-  auth: `${BASE_URL_PUBLIC}/access`,
-  topic: `admin/topic`,
-  brightcove: `/brightcove`,
-};
+  auth: {
+    login: "/auth/login",
+    register: "/auth/register",
+    verifyOtp: "/auth/verify-otp",
+    resendOtp: "/auth/resend-otp",
+    logout: "/auth/logout",
+  },
+  basic: {
+    curriculum: "/basic/curriculum",
+    lesson: (id: number) => `/basic/lessons/${id}`,
+    completeLesson: (id: number) => `/basic/lessons/${id}/complete`,
+    unit: (id: number) => `/basic/units/${id}`,
+    level: (key: string) => `/basic/levels/${key}`,
+    plan: "/basic/plan",
+    planPreview: "/basic/plan/preview",
+    planReschedule: "/basic/plan/reschedule",
+    completeTask: (id: number) => `/basic/plan/tasks/${id}/complete`,
+  },
+  modules: {
+    list: "/modules",
+    enroll: (key: string) => `/modules/${key}/enroll`,
+  },
+  admin: {
+    passages: "/admin/passages",
+    passage: (id: number) => `/admin/passages/${id}`,
+    questions: "/admin/questions",
+    question: (id: number) => `/admin/questions/${id}`,
+    packages: "/admin/packages",
+    package: (id: number) => `/admin/packages/${id}`,
+    packageSections: (id: number) => `/admin/packages/${id}/sections`,
+    packagePublish: (id: number) => `/admin/packages/${id}/publish`,
+    quotes: "/admin/quotes",
+    quote: (id: number) => `/admin/quotes/${id}`,
+    basic: {
+      curriculum: "/admin/basic/curriculum",
+      level: (key: string) => `/admin/basic/levels/${key}`,
+      units: "/admin/basic/units",
+      unit: (id: number) => `/admin/basic/units/${id}`,
+      moveUnit: (id: number) => `/admin/basic/units/${id}/move`,
+      lessons: "/admin/basic/lessons",
+      lesson: (id: number) => `/admin/basic/lessons/${id}`,
+      moveLesson: (id: number) => `/admin/basic/lessons/${id}/move`,
+    },
+  },
+  quotes: {
+    today: "/quotes/today",
+  },
+  exam: {
+    packages: "/ielts/packages",
+    package: (id: number) => `/ielts/packages/${id}`,
+    start: (packageId: number) => `/ielts/packages/${packageId}/attempts`,
+    attempts: "/ielts/attempts",
+    attempt: (id: number) => `/ielts/attempts/${id}`,
+    answers: (id: number) => `/ielts/attempts/${id}/answers`,
+    submit: (id: number) => `/ielts/attempts/${id}/submit`,
+    result: (id: number) => `/ielts/attempts/${id}/result`,
+  },
+} as const;

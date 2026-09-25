@@ -1,0 +1,131 @@
+{
+  "title": "Pilih dunia visual IELTS Vibe",
+  "question": "Pengacakan menugaskan Peta Rute. Pertahankan, ambil alternatif, atau acak ulang.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Peta Rute",
+      "kicker": "THE ROLL",
+      "lineage": "diagram jalur MRT Jakarta & KRL, tradisi peta Harry Beck",
+      "thesis": "Belajar sebagai perjalanan kereta: tiap skill satu jalur berwarna, tiap soal satu stasiun, tanggal tes adalah terminus.",
+      "palette": ["#FFFFFF", "#16181D", "#F0762A", "#C8233F", "#2D64C8", "#7C4DDB", "#0F9D8A"],
+      "materials": ["panel rambu putih berenamel", "garis jalur tebal bersudut 45°", "papan hitung mundur peron"],
+      "viewport": "Dashboard adalah peta sistem: jalur Basic dan jalur IELTS GT, stasiun berikutnya menyala; di ujian, pita jalur di atas layar dengan tiap nomor soal sebagai stasiun.",
+      "risk": "Terasa dipaksakan kalau metafora stasiun dipakai untuk hal yang bukan urutan perjalanan.",
+      "raised": [
+        { "from": "challenger-pc98", "raise": "Layar ujian dibagi wilayah tetap yang tidak pernah bergeser; berpindah soal hanya mengganti isi wilayah." },
+        { "from": "challenger-oscilloscope", "raise": "Timer, sisa hari, dan band tampil sebagai readout angka lebar tetap, seperti layar hitung mundur di peron." },
+        { "from": "challenger-ikeda", "raise": "Warna dipakai hanya sebagai warna jalur; permukaan lain putih dan tinta, tanpa gradasi atau warna dekoratif." },
+        { "from": "challenger-miura", "raise": "Setiap soal dan section punya kode stasiun (mis. L·07, R·31) yang konsisten dari ujian sampai pembahasan." },
+        { "from": "challenger-alphabet-storm", "raise": "Satu keluarga grotesk memikul semua teks, dengan kontras skala ekstrem: angka band monumental, label kecil tegas." }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "Boarding Pass",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "boarding pass & papan keberangkatan bandara modern",
+      "thesis": "Tanggal tes adalah jadwal keberangkatan, target band adalah tujuan, tiap paket ujian adalah boarding pass.",
+      "palette": ["#FFFFFF", "#0B1F3A", "#F2B705", "#E4E7EC"],
+      "materials": ["kertas termal boarding pass", "papan FIDS kuning-hitam", "barcode & kode IATA"],
+      "viewport": "Dashboard adalah boarding pass besar: rute dari band sekarang ke band target, tanggal tes sebagai waktu boarding, sisa hari sebagai hitung mundur gate.",
+      "risk": "Paling mudah ditebak: metafora perjalanan sudah lazim dipakai agen imigrasi dan kursus IELTS."
+    },
+    {
+      "id": "challenger-ticket-wallet",
+      "label": "Dompet Tiket Era Jet",
+      "verdict": "competitive",
+      "lineage": "dompet tiket maskapai tahun 1960-an dengan kupon rangkap karbon",
+      "thesis": "Tiap section ujian adalah kupon penerbangan yang disobek dan dicap begitu selesai.",
+      "palette": ["#FAF8F2", "#1C2E5C", "#D02B2B", "#5B3B8C"],
+      "materials": ["kupon kertas rangkap karbon", "cap VOID/USED merah", "busur rute lipat"],
+      "viewport": "Daftar tes adalah dompet tiket; satu kupon per skill dengan cap status; band tercetak seperti angka karbon di kolom tetap.",
+      "case": "Unggul telak di identifikasi audiens (calon migran, karakter berseragam kru); seri di kejelasan, karena jalur rute lebih jelas menjawab ‘apa selanjutnya’.",
+      "risk": "Nuansa retro 60-an bisa terasa seperti kostum di halaman admin yang padat.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-jet-age-ticket-wallet-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/vernacular-ephemera-jet-age-ticket-wallet.webp"
+    },
+    {
+      "id": "challenger-pc98",
+      "label": "Layar PC-98",
+      "verdict": "declined",
+      "lineage": "layar komputer Jepang 16 warna 640×400",
+      "thesis": "Wilayah layar tetap, konten berganti di dalamnya.",
+      "palette": ["#000000", "#FFFFFF", "#0000AA", "#AA0000"],
+      "materials": ["dither piksel", "jendela teks berbingkai"],
+      "viewport": "Jendela teks bawah, ilustrasi karakter di kanan.",
+      "case": "Kalah di kedua sumbu: estetika piksel asing bagi audiens dan mengorbankan keterbacaan teks panjang.",
+      "kept": "Wilayah layar ujian yang tidak pernah bergeser.",
+      "risk": "Terbaca sebagai nostalgia retro-game.",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-pc98-sixteen-color-field-hero.webp"
+    },
+    {
+      "id": "challenger-oscilloscope",
+      "label": "Osiloskop",
+      "verdict": "declined",
+      "lineage": "bangku sinyal laboratorium",
+      "thesis": "Semua diukur terhadap graticule, angka sebagai readout.",
+      "palette": ["#0A0F0A", "#3CFF6B", "#FFB000"],
+      "materials": ["kaca fosfor", "knob berdetent"],
+      "viewport": "Satu layar gelap dengan jejak sinyal hijau.",
+      "case": "Kalah di kedua sumbu: dunia laboratorium elektronik tidak dikenali audiens, dan layar gelap melelahkan untuk sesi baca panjang.",
+      "kept": "Angka sebagai readout lebar tetap.",
+      "risk": "Terasa seperti alat teknisi, bukan tempat belajar.",
+      "hero": "https://impeccable.style/worlds/cards/scientific-notation-oscilloscope-signal-bench-hero.webp"
+    },
+    {
+      "id": "challenger-ikeda",
+      "label": "Datamatics",
+      "verdict": "declined",
+      "lineage": "instalasi data hitam-putih Ryoji Ikeda",
+      "thesis": "Hanya hitam dan putih, tanpa abu-abu dan tanpa warna.",
+      "palette": ["#000000", "#FFFFFF"],
+      "materials": ["kolom barcode", "garis rambut"],
+      "viewport": "Dinding kolom data dengan kurva sinus.",
+      "case": "Kalah di kedua sumbu: dingin dan abstrak, tidak membimbing pelajar mandiri.",
+      "kept": "Komitmen palet total: warna hanya untuk jalur, tidak pernah untuk hiasan.",
+      "risk": "Terbaca sebagai karya seni, bukan alat belajar.",
+      "hero": "https://impeccable.style/worlds/cards/ikeda-datamatics-hero.webp"
+    },
+    {
+      "id": "challenger-miura",
+      "label": "Lipatan Miura",
+      "verdict": "declined",
+      "lineage": "lembar lipat dirgantara",
+      "thesis": "Satu tarikan membuka seluruh lembar berlipat.",
+      "palette": ["#F7F7F4", "#C8A24A", "#8FA9C8", "#1A1A1A"],
+      "materials": ["kertas matte", "foil emas"],
+      "viewport": "Paket kecil yang terbuka menjadi lembar besar.",
+      "case": "Kalah di kedua sumbu: indah tapi tidak punya padanan dengan alur belajar atau ujian.",
+      "kept": "Setiap elemen punya kode ID yang konsisten.",
+      "risk": "Dekoratif, mengaburkan tugas.",
+      "hero": "https://impeccable.style/worlds/cards/paper-folds-pleats-deployable-miura-orbit-sheet-hero.webp"
+    },
+    {
+      "id": "challenger-alphabet-storm",
+      "label": "Badai Alfabet",
+      "verdict": "declined",
+      "lineage": "dunia surealis huruf-sebagai-cuaca",
+      "thesis": "Huruf mengembun jadi kata lalu pecah jadi cuaca.",
+      "palette": ["#FFFFFF", "#111111", "#B8BCC4"],
+      "materials": ["grotesk monumental", "partikel huruf"],
+      "viewport": "Kata-kata raksasa berubah jadi hujan.",
+      "case": "Kalah di kedua sumbu: gerak dekoratif mengganggu konsentrasi ujian.",
+      "kept": "Satu grotesk dengan kontras skala ekstrem.",
+      "risk": "Mengalihkan perhatian dari soal.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-alphabet-storm-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code" },
+  "canon": true,
+  "canonCard": {
+    "label": "Standar kategori",
+    "thesis": "Dashboard edtech seperti yang dikirim pesaing, dikerjakan dengan rapi.",
+    "palette": ["#FFFFFF", "#111827", "#2563EB"],
+    "materials": ["grid bersih", "kartu dan cincin progres"],
+    "viewport": "Kartu per skill dengan persentase progres dan grafik nilai.",
+    "risk": "Tidak bisa dibedakan dari pesaing, memang dirancang begitu."
+  },
+  "steer": true
+}

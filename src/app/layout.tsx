@@ -1,15 +1,28 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google"; // Asumsi pakai font Inter
+import { Figtree, Poppins } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "../provider/QueryProvider";
 
-// Import QueryProvider yang barusan lu bikin
+const figtree = Figtree({
+  subsets: ["latin"],
+  variable: "--font-figtree",
+  display: "swap",
+});
 
-const inter = Inter({ subsets: ["latin"] });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-poppins",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "IELTS App Platform",
-  description: "Platform ujian IELTS terbaik",
+  title: {
+    default: "IELTS Vibe",
+    template: "%s · IELTS Vibe",
+  },
+  description:
+    "Go from English foundations to your IELTS General Training target band, with test simulations that mirror the real format.",
 };
 
 export default function RootLayout({
@@ -18,12 +31,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        {/* Bungkus seluruh aplikasi dengan QueryProvider */}
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+    <html lang="en" className={`${figtree.variable} ${poppins.variable}`}>
+      <body>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );

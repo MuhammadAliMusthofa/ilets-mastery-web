@@ -1,47 +1,70 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { authService } from "@/src/features/auth/services/auth.service";
+import type { AuthUser } from "@/src/models/auth";
+import { useExamStore } from "@/src/store/examStore";
 
-// 1. Definisikan Tipe User
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "student" | "teacher";
-  avatar?: string;
-}
-
-// 2. Definisikan Tipe State & Actions
 interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
-  
-  // Actions
-  setAuth: (user: User, token: string) => void;
-  logout: () => void;
+
+  setAuth: (user: AuthUser, token: string) => void;
+  clearAuth: () => void;
+  logout: () => Promise<void>;
 }
 
-// 3. Bikin Store-nya
+// Beberapa request yang gagal 401 bersamaan masing-masing memicu logout lewat
+// interceptor axios. Tanda ini memastikan hanya satu yang benar-benar jalan.
+let isLoggingOut = false;
+
+/**
+ * Cookie `role` bisa dihapus dari JS; `accessToken` bersifat httpOnly dan
+ * hanya bisa dihapus backend. Tanpa `role`, middleware tidak lagi melempar
+ * user dari /login ke dashboard, jadi logout tetap tuntas walau backend mati.
+ */
+const clearClientCookies = () => {
+  document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
+};
+
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
 
-      setAuth: (user, token) => 
-        set({ user, token, isAuthenticated: true }),
+      setAuth: (user, token) => set({ user, token, isAuthenticated: true }),
 
-      logout: () => {
-        set({ user: null, token: null, isAuthenticated: false });
-        // Bersihin cookies/localStorage kalau perlu
-        localStorage.removeItem("auth-storage");
-        window.location.href = "/login";
+      clearAuth: () => set({ user: null, token: null, isAuthenticated: false }),
+
+      logout: async () => {
+        if (isLoggingOut) {
+          return;
+        }
+        isLoggingOut = true;
+
+        try {
+          await authService.logout();
+        } catch (error) {
+          console.error("Gagal memanggil endpoint logout:", error);
+        } finally {
+          get().clearAuth();
+          useExamStore.getState().reset();
+          clearClientCookies();
+          // replace: tombol Back tidak membawa kembali ke halaman terproteksi.
+          window.location.replace("/login");
+        }
       },
     }),
     {
-      name: "auth-storage", // Nama key di localStorage
+      name: "auth-storage",
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );
